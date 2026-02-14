@@ -1,6 +1,6 @@
 .*
 README.md
-Containerfile
+Dockerfile
 .venv/
 node_modules/
 containers/
