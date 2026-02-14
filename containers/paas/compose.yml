@@ -24,7 +24,7 @@ services:
     pull_policy: build
     build:
       context: ../..
-      dockerfile: containers/paas/Containerfile
+      dockerfile: containers/paas/Dockerfile
     restart: unless-stopped
     cap_add:
       - NET_ADMIN

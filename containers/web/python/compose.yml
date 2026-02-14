@@ -3,7 +3,7 @@ services:
     pull_policy: build
     build:
       context: ../..
-      dockerfile: containers/web/python/Containerfile
+      dockerfile: containers/web/python/Dockerfile
       target: ${TARGET:-production}
       args:
         UV_NO_DEV: 0
