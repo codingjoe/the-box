@@ -1,4 +1,4 @@
-FROM caddy:2.10.0-alpine
+FROM caddy:2.10.2-alpine
 LABEL title="Caddy reverse proxy"
 LABEL license="BSD-2-Clause"
 LABEL url="https://github.com/codingjoe/the-box"
