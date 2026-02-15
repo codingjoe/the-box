@@ -23,7 +23,7 @@ docker service scale web=5  # Scale to 5 replicas
 
 ### Resource management
 
-You can also limit the resources used by each service in your [`containers/web/compose.yml`](../containers/compose.web.yml) file. This allows you to control the amount of CPU and memory used by each service.
+You can also limit the resources used by each service in your [`containers/compose.web.yml`](../containers/compose.web.yml) file. This allows you to control the amount of CPU and memory used by each service.
 
 ```yaml
 services:
