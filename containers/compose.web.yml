@@ -1,5 +1,6 @@
 services:
   web:
+    image: scratch # placeholder image for OCI artifact
     memswap_limit: 1g # Limit total memory usage (RAM + swap) to 1GB
     deploy:
       mode: replicated

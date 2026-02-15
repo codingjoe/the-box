@@ -10,13 +10,12 @@ concurrency:
   cancel-in-progress: true
 jobs:
   container:
-    name: Build containers
+    name: build
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
         container-file:
-          - containers/paas/Dockerfile
           - containers/web/node/Dockerfile
           - containers/web/python/Dockerfile
     steps:
@@ -29,3 +28,21 @@ jobs:
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+  compse:
+    name: compose
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compose-file:
+          - compose.yml
+          - compose.app.yml
+          - containers/compose.caddy.yml
+          - containers/compose.postgres.yml
+          - containers/compose.redis.yml
+          - containers/compose.smtp.yml
+          - containers/compose.web.yml
+          - containers/web/python/compose.yml
+    steps:
+      - uses: actions/checkout@v6
+      - run: docker compose --file ${{ matrix.compose-file }} config --no-interpolate --no-path-resolution --no-env-resolution --quiet
