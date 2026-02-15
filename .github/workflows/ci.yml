@@ -28,7 +28,7 @@ jobs:
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
-  compse:
+  compose:
     name: compose
     runs-on: ubuntu-latest
     strategy:
@@ -42,7 +42,7 @@ jobs:
           - containers/compose.redis.yml
           - containers/compose.smtp.yml
           - containers/compose.web.yml
-          - containers/web/python/compose.yml
+
     steps:
       - uses: actions/checkout@v6
       - run: docker compose --file ${{ matrix.compose-file }} config --no-interpolate --no-path-resolution --no-env-resolution --quiet
