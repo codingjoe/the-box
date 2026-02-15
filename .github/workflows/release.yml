@@ -9,12 +9,7 @@ on:
   workflow_dispatch:
 jobs:
   oci-artifacts:
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      id-token: write
-    name: build
+    name: OCI artifact
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
