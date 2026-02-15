@@ -42,7 +42,6 @@ jobs:
           - containers/compose.redis.yml
           - containers/compose.smtp.yml
           - containers/compose.web.yml
-
     steps:
       - uses: actions/checkout@v6
       - run: docker compose --file ${{ matrix.compose-file }} config --no-interpolate --no-path-resolution --no-env-resolution --quiet
