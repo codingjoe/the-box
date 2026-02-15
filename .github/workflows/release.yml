@@ -1,0 +1,35 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+  release:
+    types:
+      - published
+  workflow_dispatch:
+jobs:
+  oci-artifacts:
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    name: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        compose-file:
+          - compose.yml
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - run: docker compose --file ${{ matrix.compose-file }} config --no-interpolate --no-path-resolution --no-env-resolution -o compose.full.yml
+      - run: docker compose --file compose.full.yml publish -y --dry-run the-box:${{ github.sha }}
