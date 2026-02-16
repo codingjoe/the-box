@@ -50,7 +50,7 @@ jobs:
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - run: sudo curl -sLo "/usr/libexec/docker/cli-plugins/docker-compose" "https://github.com/docker/compose/releases/download/latest/docker-compose-linux-x86_64"
+      - run: sudo curl -sLo "/usr/libexec/docker/cli-plugins/docker-compose" "https://github.com/docker/compose/releases/download/v5.0.2/docker-compose-linux-x86_64"
       - run: |
           docker --version
           docker compose version
