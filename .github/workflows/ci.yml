@@ -50,12 +50,7 @@ jobs:
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Update Docker compose version
-        run: |
-          sudo curl -Lo "/usr/libexec/docker/cli-plugins/docker-compose" "https://github.com/docker/compose/releases/download/v5.0.2/docker-compose-linux-x86_64"
-      - run: |
-          docker --version
-          docker compose version
+      - uses: codingjoe/the-box/actions/compose@artifacts
       - run: docker compose --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose.${{ matrix.service }}.compiled.yml
       - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish -y --dry-run the-box-${{ matrix.service }}:${{ github.sha }}
       - uses: actions/upload-artifact@v6
