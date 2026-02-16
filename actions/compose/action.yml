@@ -11,9 +11,5 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - run: sudo curl -sLo "/usr/libexec/docker/cli-plugins/docker-compose" "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION:-latest}/docker-compose-linux-x86_64"
-      shell: sh
-      env:
-        DOCKER_COMPOSE_VERSION: ${{ inputs.version }}
-    - run: docker-compose version
+    - run: sudo curl -sLo "/usr/libexec/docker/cli-plugins/docker-compose" "https://github.com/docker/compose/releases/download/${{ inputs.version }}/docker-compose-linux-x86_64"
       shell: sh
