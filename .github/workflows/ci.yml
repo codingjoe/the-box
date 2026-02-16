@@ -50,6 +50,10 @@ jobs:
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Update Docker compose version
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y docker-compose-plugin
       - run: |
           docker --version
           docker compose version
