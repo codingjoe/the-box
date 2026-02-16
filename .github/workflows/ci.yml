@@ -52,7 +52,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Update Docker compose version
         run: |
-          curl -Lo "$(command -v docker-compose)" "https://github.com/docker/compose/releases/download/v5.0.2/docker-compose-linux-x86_64"
+          curl -Lo "/usr/libexec/docker/cli-plugins/docker-compose" "https://github.com/docker/compose/releases/download/v5.0.2/docker-compose-linux-x86_64"
       - run: |
           docker --version
           docker compose version
