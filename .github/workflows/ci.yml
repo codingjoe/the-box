@@ -50,7 +50,7 @@ jobs:
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - uses: codingjoe/actions/compose@artifacts
+      - uses: codingjoe/the-box/actions/compose@artifacts
       - run: |
           docker --version
           docker compose version
