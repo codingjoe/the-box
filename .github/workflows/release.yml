@@ -1,33 +1,13 @@
-name: CI
+name: Release
 on:
   push:
     branches:
       - main
-  pull_request:
+  release:
+    types:
+      - published
   workflow_dispatch:
-concurrency:
-  group: ${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
 jobs:
-  container:
-    name: build
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        container-file:
-          - containers/web/node/Dockerfile
-          - containers/web/python/Dockerfile
-    steps:
-      - uses: actions/checkout@v6
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ${{ matrix.container-file }}
-          push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
   oci-artifacts:
     name: OCI artifact
     runs-on: ubuntu-latest
@@ -48,7 +28,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - uses: codingjoe/the-box/actions/compose@main
       - run: docker compose --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose.${{ matrix.service }}.compiled.yml
-      - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish -y --dry-run the-box-${{ matrix.service }}:${{ github.sha }}
+      - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish -y the-box-${{ matrix.service }}:${{ github.event.release.tag_name }}
       - uses: actions/upload-artifact@v6
         with:
           name: compose.${{ matrix.service }}.yml

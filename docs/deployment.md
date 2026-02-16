@@ -14,7 +14,6 @@ This script will guide you through the following steps:
 
 1. **Domain Configuration**: You will be prompted to enter your domain name.
 1. **Server Access**: The script will verify SSH access to your server.
-1. **GitHub Integration**: It will help you create a GitHub OAuth App for secure authentication.
 1. **Repository Configuration**: The script will set up the necessary GitHub repository secrets and variables to enable automated deployments. These include:
    - `SSH_HOSTNAME`: Your server's hostname or IP address.
    - `SSH_PRIVATE_KEY`: A private SSH key for accessing the server.

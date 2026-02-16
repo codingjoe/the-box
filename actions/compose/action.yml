@@ -1,0 +1,19 @@
+name: "Docker Compose"
+description: "Update Docker Compose plugin."
+branding:
+  icon: 'anchor'
+  color: 'blue'
+inputs:
+  version:
+    description: "Version of Docker Compose plugin to update to (e.g., 2.27.1)"
+    required: false
+    default: "latest"
+runs:
+  using: "composite"
+  steps:
+    - if: ${{ inputs.version != 'latest' }}
+      run: sudo curl -vLo "/usr/libexec/docker/cli-plugins/docker-compose" "https://github.com/docker/compose/releases/download/${{ inputs.version }}/docker-compose-linux-x86_64"
+      shell: sh
+    - if: ${{ inputs.version == 'latest' }}
+      run: sudo curl -vLo "/usr/libexec/docker/cli-plugins/docker-compose" "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64"
+      shell: sh

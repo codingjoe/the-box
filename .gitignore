@@ -211,3 +211,6 @@ node_modules/
 
 # PG backups
 backups/
+
+# compiled compose artifacts
+compose.*.compiled.yml

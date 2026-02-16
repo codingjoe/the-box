@@ -2,7 +2,7 @@ services:
   web:
     pull_policy: build
     build:
-      context: ../..
+      context: ..
       dockerfile: containers/web/python/Dockerfile
       target: ${TARGET:-production}
       args:
@@ -22,3 +22,6 @@ services:
       mode: replicated
       replicas: 2
     stop_grace_period: 1m
+  caddy:
+    volumes:
+      - ../Caddyfile:/etc/caddy/app.caddy:ro

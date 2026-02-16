@@ -11,13 +11,8 @@ on:
       HOSTNAME:
         required: false
         type: string
-      CADDY_OAUTH_CLIENT_ID:
-        required: true
-        type: string
     secrets:
       SSH_PRIVATE_KEY:
-        required: true
-      CADDY_OAUTH_CLIENT_SECRET:
         required: true
       DOTENV_PRIVATE_KEY_PRODUCTION:
         required: true
@@ -50,8 +45,6 @@ jobs:
         run: docker compose --file compose.paas.yml --project-name paas up --detach --quiet-pull
         env:
           HOSTNAME: ${{ inputs.HOSTNAME }}
-          CADDY_OAUTH_CLIENT_ID: ${{ inputs.CADDY_OAUTH_CLIENT_ID }}
-          CADDY_OAUTH_CLIENT_SECRET: ${{ secrets.CADDY_OAUTH_CLIENT_SECRET }}
   app:
     if: inputs.SSH_HOSTNAME != ''
     needs: paas
