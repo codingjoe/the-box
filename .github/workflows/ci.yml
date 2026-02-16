@@ -52,7 +52,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Update Docker compose version
         run: |
-          wget -O $(command -v docker-compose) https://github.com/docker/compose/releases/download/v5.0.2/docker-compose-linux-x86_64
+          curl -Lo "$(command -v docker-compose)" "https://github.com/docker/compose/releases/download/v5.0.2/docker-compose-linux-x86_64"
       - run: |
           docker --version
           docker compose version
