@@ -28,23 +28,6 @@ jobs:
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
-  compose:
-    name: compose
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        compose-file:
-          - compose.yml
-          - compose.app.yml
-          - containers/compose.caddy.yml
-          - containers/compose.postgres.yml
-          - containers/compose.redis.yml
-          - containers/compose.smtp.yml
-          - containers/compose.web.yml
-    steps:
-      - uses: actions/checkout@v6
-      - run: docker compose --file ${{ matrix.compose-file }} config --no-interpolate --no-path-resolution --no-env-resolution --quiet
   oci-artifacts:
     name: OCI artifact
     runs-on: ubuntu-latest
@@ -67,5 +50,10 @@ jobs:
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker compose --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose.compiled.yml
-      - run: docker compose --file compose.compiled.yml publish -y --dry-run the-box-${{ matrix.service }}:${{ github.sha }}
+      - run: docker --version
+      - run: docker compose --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose.${{ matrix.service }}.compiled.yml
+      - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish -y --dry-run the-box-${{ matrix.service }}:${{ github.sha }}
+      - uses: actions/upload-artifact@v6
+        with:
+          name: compose.${{ matrix.service }}.compiled.yml
+          path: compose.${{ matrix.service }}.compiled.yml
