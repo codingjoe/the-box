@@ -53,7 +53,7 @@ jobs:
       - uses: codingjoe/the-box/actions/compose@artifacts
       - run: |
           docker --version
-          docker compose version
+          docker-compose version
       - run: docker compose --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose.${{ matrix.service }}.compiled.yml
       - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish -y --dry-run the-box-${{ matrix.service }}:${{ github.sha }}
       - uses: actions/upload-artifact@v6

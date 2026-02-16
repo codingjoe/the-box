@@ -15,5 +15,5 @@ runs:
       shell: sh
       env:
         DOCKER_COMPOSE_VERSION: ${{ inputs.version }}
-    - run: docker compose version
+    - run: docker-compose version
       shell: sh
