@@ -4,7 +4,7 @@ branding:
   color: gray-dark
 description: 'Capture a backup of the PostgreSQL database and upload it as an artifact'
 inputs:
-  ssh-hostname:
+  ssh-host:
     description: 'The hostname or IP address of the production server.'
     required: true
   ssh-known-hosts:
@@ -32,7 +32,7 @@ runs:
     - name: Setting up Docker context for remote deployment
       shell: sh
       run: |
-        docker context create production --description "Production Server" --docker "host=ssh://github@${{ inputs.ssh-hostname }}"
+        docker context create production --description "Production Server" --docker "host=ssh://github@${{ inputs.ssh-host }}"
         docker context use production
         touch .env
     - name: Capture Postgres backup

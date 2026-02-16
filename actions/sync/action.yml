@@ -4,7 +4,7 @@ branding:
   icon: lock
   color: gray-dark
 inputs:
-  ssh-hostname:
+  ssh-host:
     description: 'The hostname or IP address of the remote server to sync SSH keys to (e.g., "example.com"). If not provided, the action will skip syncing SSH keys.'
     required: true
   ssh-known-hosts:
@@ -129,10 +129,10 @@ runs:
         AUTHORIZED_KEYS: "${{ steps.fetch-keys.outputs.authorized_keys }}"
       run: |
         echo "::group::Uploading SSH keys to remote host"
-        echo "::debug::Syncing SSH keys to ${{ inputs.ssh-hostname }}"
+        echo "::debug::Syncing SSH keys to ${{ inputs.ssh-host }}"
 
         # Write directly to remote file
-        echo "$AUTHORIZED_KEYS" | ssh "github@${{ inputs.ssh-hostname }}" "sudo tee /home/collaborator/.ssh/authorized_keys > /dev/null"
+        echo "$AUTHORIZED_KEYS" | ssh "github@${{ inputs.ssh-host }}" "sudo tee /home/collaborator/.ssh/authorized_keys > /dev/null"
 
         echo "::endgroup::"
     - name: Verify authorized_keys
@@ -140,8 +140,8 @@ runs:
       run: |
         echo "::group::Verifying authorized_keys on remote host"
         echo "::debug::Current authorized_keys on remote host:"
-        ssh "github@${{ inputs.ssh-hostname }}" "sudo cat /home/collaborator/.ssh/authorized_keys"
+        ssh "github@${{ inputs.ssh-host }}" "sudo cat /home/collaborator/.ssh/authorized_keys"
 
-        remote_key_count=$(ssh "github@${{ inputs.ssh-hostname }}" "sudo grep -c '^command=' /home/collaborator/.ssh/authorized_keys" || true)
-        echo "::notice::✓ Synced $remote_key_count SSH keys to ${{ inputs.ssh-hostname }}"
+        remote_key_count=$(ssh "github@${{ inputs.ssh-host }}" "sudo grep -c '^command=' /home/collaborator/.ssh/authorized_keys" || true)
+        echo "::notice::✓ Synced $remote_key_count SSH keys to ${{ inputs.ssh-host }}"
         echo "::endgroup::"
