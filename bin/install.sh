@@ -87,31 +87,6 @@ if [ -n "$input_project_name" ]; then
     project_name=$input_project_name
 fi
 
-# OAuth App setup
-gh_create_app_url="https://github.com/settings/apps/new"
-if gh api "orgs/${gh_owner}" >/dev/null 2>&1; then
-    gh_create_app_url="https://github.com/organizations/${gh_owner}/settings/apps"
-fi
-
-# =============================================================================
-headline "GitHub OAuth App Setup"
-
-echo -e "
-Create a new OAuth App at GitHub: ${info}${gh_create_app_url}${fin}
-Use the following values:
-- Application name: ${info}${project_name}${fin}
-- Homepage URL: ${info}https://${hostname}/${fin}
-- Authorization callback URL: ${info}https://auth.${hostname}/oauth2/github/authorization-code-callback${fin}
-
-Please check 'Request user authorization (OAuth) during installation'.
-You can disable the Webhook section.
-"
-read -erp "Press enter to open the URL in your browser..."
-open "${gh_create_app_url}" || true
-read -erp "Enter your OAUTH App Client ID: " oauth_client_id
-read -ersp "Enter your OAUTH App Client Secret: " oauth_client_secret
-echo ""
-
 # =============================================================================
 headline "SSH Key Setup"
 
@@ -128,8 +103,6 @@ echo "Domain: ${hostname}"
 echo "SSH User: ${ssh_username}"
 echo "Project Name: ${project_name}"
 echo "GitHub Owner: ${gh_owner}"
-echo "OAuth Client ID: ${oauth_client_id}"
-echo "OAUTH Client Secret: *****$(echo "$oauth_client_secret" | tail -c 8)"
 hr
 echo "Press any key to start the installation, or Ctrl+C to cancel..."
 # shellcheck disable=SC2034
@@ -166,8 +139,6 @@ headline "Setting your GitHub environment"
 echo -en "${action}"
 
 echo "Configuring repository workflow secrets on GitHub..."
-gh variable set CADDY_OAUTH_CLIENT_ID --body "$oauth_client_id"
-gh secret set CADDY_OAUTH_CLIENT_SECRET --body "$oauth_client_secret"
 gh variable set SSH_HOSTNAME --body "$hostname"
 gh variable set SSH_KNOWN_HOSTS --body "$(ssh-keyscan "${hostname}")"
 gh variable set SSH_PUBLIC_KEY < "${ssh_key_path}/deploy_key.pub"

@@ -1,4 +1,4 @@
 include:
   - path:
       - compose.app.yml
-      - compose.paas.yml
+      - containers/compose.caddy.yml

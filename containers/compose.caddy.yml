@@ -1,0 +1,55 @@
+services:
+  caddy:
+    container_name: caddy
+    image: caddy:2.10.2-alpine
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    configs:
+      - source: caddyfile
+        target: /etc/caddy/Caddyfile
+    networks:
+      - app
+      - wan
+    environment:
+      HOSTNAME: ${HOSTNAME}
+    healthcheck:
+      test: ["CMD-SHELL", "caddy validate --config /etc/caddy/Caddyfile"]
+    deploy:
+      mode: global
+    labels:
+      dev.dozzle.group: the-box
+networks:
+  app:
+    name: app
+    driver: bridge
+    internal: true
+  wan:
+    name: wan
+    driver: bridge
+volumes:
+  caddy_data:
+  caddy_config:
+configs:
+  caddyfile:
+    content: |
+      {
+        log {
+          output stdout
+          format json
+        }
+      }
+
+      import /etc/caddy/*.caddy
+
+      :80, :443 {
+        respond "Not Found" 404
+      }

@@ -9,7 +9,7 @@ Secure storage is a complex topic with many considerations. We recommend using s
 
 ## Local storage (not recommended)
 
-If you still want to use local storage for development or testing purposes, you can mount a volume to your web container by modifying the `volumes` section in the [`containers/web/compose.yml`](../containers/web/compose.yml) file.
+If you still want to use local storage for development or testing purposes, you can mount a volume to your web container by modifying the `volumes` section in the [`containers/compose.web.yml`](../containers/compose.web.yml) file.
 
 ```yaml
 services:
