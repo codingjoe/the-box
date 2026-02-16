@@ -2,7 +2,7 @@ name: Sync SSH Keys
 description: "Fetch SSH keys of all repository collaborators with push/admin access and sync them to a remote host for secure access."
 branding:
   icon: lock
-  color: blue
+  color: gray-dark
 inputs:
   ssh-hostname:
     description: 'The hostname or IP address of the remote server to sync SSH keys to (e.g., "example.com"). If not provided, the action will skip syncing SSH keys.'
@@ -50,7 +50,7 @@ runs:
         echo "::debug::Total collaborators with push/admin access: $collaborator_count"
         echo "::endgroup::"
       env:
-        GH_TOKEN: ${{ secrets.github-token }}
+        GH_TOKEN: ${{ inputs.github-token }}
     - name: Fetch SSH keys for collaborators
       id: fetch-keys
       shell: sh
@@ -110,11 +110,11 @@ runs:
 
         echo "::endgroup::"
       env:
-        GH_TOKEN: ${{ secrets.github-token }}
+        GH_TOKEN: ${{ inputs.github-token }}
     - name: Setup SSH
       uses: webfactory/ssh-agent@v0.9.1
       with:
-        ssh-private-key: ${{ secrets.ssh-private-key }}
+        ssh-private-key: ${{ inputs.ssh-private-key }}
     - name: Pin known hosts
       shell: sh
       run: |

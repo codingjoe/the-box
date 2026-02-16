@@ -28,7 +28,7 @@ runs:
     - uses: actions/checkout@v6
     - uses: webfactory/ssh-agent@v0.9.1
       with:
-        ssh-private-key: ${{ secrets.ssh_private_key }}
+        ssh-private-key: ${{ inputs.ssh_private_key }}
     - name: Pin known hosts
       run: |
         echo "::group::Pinning known hosts"
@@ -42,10 +42,10 @@ runs:
         docker context create production --description "Production Server" --docker "host=ssh://github@${{ inputs.ssh_hostname }}"
         docker context use production
       shell: sh
-    - uses: codingjoe/the-box/actions/compose@${{ github.ref_name }}
+    - uses: codingjoe/the-box/actions/compose@main
     - name: Deploy production containers
       run: docker compose --file compose.yml --project-name ${{ inputs.project-name }}  up --detach --quiet-pull
       shell: sh
       env:
         HOSTNAME: ${{ inputs.hostname }}
-        DOTENV_PRIVATE_KEY_PRODUCTION: ${{ secrets.dotenv_private_key }}
+        DOTENV_PRIVATE_KEY_PRODUCTION: ${{ inputs.dotenv_private_key }}
