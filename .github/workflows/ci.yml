@@ -51,11 +51,7 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Update Docker compose version
-        run: |
-          export COMPOSE_PATH=$(command -v docker-compose)
-          unlink $COMPOSE_PATH
-          curl -Lo $COMPOSE_PATH https://github.com/docker/compose/releases/download/v5.0.2/docker-compose-linux-x86_64
-          chmod a+x $COMPOSE_PATH
+        run: docker plugin upgrade
       - run: |
           docker --version
           docker-compose version
