@@ -48,7 +48,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
       - uses: codingjoe/the-box/actions/compose@main
       - run: docker compose --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose.${{ matrix.service }}.compiled.yml
-      - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish -y --dry-run ${{ github.actor }}/the-box-${{ matrix.service }}:${{ github.sha }}
+      - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish  --resolve-image-digests --yes --dry-run ${{ github.actor }}/the-box-${{ matrix.service }}
       - uses: actions/upload-artifact@v6
         with:
           name: compose.${{ matrix.service }}.yml
