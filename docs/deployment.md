@@ -21,7 +21,7 @@ This script will guide you through the following steps:
 
 ## Continuous Deployment
 
-Once the initial setup is complete, your application will be automatically deployed whenever you push changes to the `main` branch. This is handled by the [`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) GitHub Actions workflow.
+Once the initial setup is complete, your application will be automatically deployed whenever you push changes to the `main` branch. This is handled by the [`.github/workflows/deploy.yml`](../actions/deploy/action.yml) GitHub Actions workflow.
 
 The deployment workflow performs the following steps:
 

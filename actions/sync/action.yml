@@ -1,0 +1,147 @@
+name: Sync SSH Keys
+description: "Fetch SSH keys of all repository collaborators with push/admin access and sync them to a remote host for secure access."
+branding:
+  icon: lock
+  color: gray-dark
+inputs:
+  ssh-host:
+    description: 'The hostname or IP address of the remote server to sync SSH keys to (e.g., "example.com"). If not provided, the action will skip syncing SSH keys.'
+    required: true
+  ssh-known-hosts:
+    description: 'The SSH known hosts entry for the remote server (e.g., "github.com ssh-rsa ..."). This is used to ensure secure SSH connections. If not provided, the action will skip pinning known hosts.'
+    required: true
+  ssh-private-key:
+    description: 'The SSH private key to use for connecting to the remote server. This should be stored as a secret in the repository.'
+    required: true
+  github-token:
+    description: 'The GitHub token to use for API requests. This should be stored as a secret in the repository.'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Get repository collaborators
+      id: get-collaborators
+      shell: sh
+      run: |
+        echo "::group::Fetching collaborators"
+        echo "::debug::Fetching collaborators for ${{ github.repository }}"
+
+        # Get all collaborators with push access or higher
+        collaborators=$(gh api \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          "/repos/${{ github.repository }}/collaborators" \
+          --jq '.[] | select(.permissions.push == true or .permissions.admin == true) | .login')
+
+        if [ -z "$collaborators" ]; then
+          echo "::error::No collaborators found with push/admin access"
+          exit 1
+        fi
+
+        echo "::debug::Found collaborators:"
+        echo "$collaborators"
+
+        # Save to output
+        echo "collaborators<<EOF" >> "$GITHUB_OUTPUT"
+        echo "$collaborators" >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
+
+        collaborator_count=$(echo "$collaborators" | wc -l)
+        echo "::debug::Total collaborators with push/admin access: $collaborator_count"
+        echo "::endgroup::"
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+    - name: Fetch SSH keys for collaborators
+      id: fetch-keys
+      shell: sh
+      run: |
+        echo "::group::Fetching SSH keys"
+
+        # Initialize authorized_keys variable
+        authorized_keys=""
+
+        # Read collaborators and fetch their SSH keys
+        while IFS= read -r username; do
+          if [ -n "$username" ]; then
+            echo "::debug::Fetching SSH keys for $username..."
+
+            # Fetch SSH keys from GitHub
+            keys=$(gh api \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "/users/$username/keys" \
+              --jq '.[].key' 2>/dev/null || true)
+            if [ -n "$keys" ]; then
+              key_count=$(echo "$keys" | wc -l)
+              echo "::debug::Found $key_count SSH key(s) for $username"
+
+              # Add each key with command restriction
+              while IFS= read -r key; do
+                if [ -n "$key" ]; then
+                  authorized_keys+="command=\"docker system dial-stdio\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty $key $username\n"
+                fi
+              done <<< "$keys"
+              authorized_keys+="\n"
+            else
+              echo "::warning::No SSH keys found for $username"
+            fi
+          fi
+        done <<< "${{ steps.get-collaborators.outputs.collaborators }}"
+
+        # Validate that we have at least one key
+        if [ -z "$authorized_keys" ]; then
+          echo "::error::No SSH keys found for any collaborators"
+          exit 1
+        fi
+
+        echo "::debug::Generated authorized_keys file:"
+        echo "$authorized_keys"
+
+        # Count keys
+        key_count=$(echo "$authorized_keys" | grep -c "^command=" || true)
+        echo "::debug::Total SSH keys to sync: $key_count"
+
+        # Save to output
+        {
+          echo "authorized_keys<<EOF"
+          echo "$authorized_keys"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
+
+        echo "::endgroup::"
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+    - name: Setup SSH
+      uses: webfactory/ssh-agent@v0.9.1
+      with:
+        ssh-private-key: ${{ inputs.ssh-private-key }}
+    - name: Pin known hosts
+      shell: sh
+      run: |
+        echo "::group::Pinning known hosts"
+        echo "${{ inputs.ssh-known-hosts }}" >> ~/.ssh/known_hosts
+        echo "::debug::Known hosts updated:"
+        cat ~/.ssh/known_hosts
+        echo "::endgroup::"
+    - name: Upload authorized_keys to remote host
+      shell: sh
+      env:
+        AUTHORIZED_KEYS: "${{ steps.fetch-keys.outputs.authorized_keys }}"
+      run: |
+        echo "::group::Uploading SSH keys to remote host"
+        echo "::debug::Syncing SSH keys to ${{ inputs.ssh-host }}"
+
+        # Write directly to remote file
+        echo "$AUTHORIZED_KEYS" | ssh "github@${{ inputs.ssh-host }}" "sudo tee /home/collaborator/.ssh/authorized_keys > /dev/null"
+
+        echo "::endgroup::"
+    - name: Verify authorized_keys
+      shell: sh
+      run: |
+        echo "::group::Verifying authorized_keys on remote host"
+        echo "::debug::Current authorized_keys on remote host:"
+        ssh "github@${{ inputs.ssh-host }}" "sudo cat /home/collaborator/.ssh/authorized_keys"
+
+        remote_key_count=$(ssh "github@${{ inputs.ssh-host }}" "sudo grep -c '^command=' /home/collaborator/.ssh/authorized_keys" || true)
+        echo "::notice::✓ Synced $remote_key_count SSH keys to ${{ inputs.ssh-host }}"
+        echo "::endgroup::"

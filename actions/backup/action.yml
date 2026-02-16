@@ -1,0 +1,45 @@
+name: Backup
+branding:
+  icon: database
+  color: gray-dark
+description: 'Capture a backup of the PostgreSQL database and upload it as an artifact'
+inputs:
+  ssh-host:
+    description: 'The hostname or IP address of the production server.'
+    required: true
+  ssh-known-hosts:
+    description: 'The SSH known hosts entry for the production server (e.g., "github.com ssh-rsa ...").'
+    required: true
+  ssh-private-key:
+    description: 'The SSH private key to use for connecting to the production server. This should be stored as a secret in the repository.'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v6
+    - uses: webfactory/ssh-agent@v0.9.1
+      with:
+        ssh-private-key: ${{ inputs.ssh-private-key }}
+    - uses: codingjoe/the-box/actions/compose@main
+    - name: Pin known hosts
+      shell: sh
+      run: |
+        echo "::group::Pinning known hosts"
+        echo "${{ inputs.ssh-known-hosts }}" >> ~/.ssh/known_hosts
+        echo "::debug::Known hosts updated:"
+        cat ~/.ssh/known_hosts
+        echo "::endgroup::"
+    - name: Setting up Docker context for remote deployment
+      shell: sh
+      run: |
+        docker context create production --description "Production Server" --docker "host=ssh://github@${{ inputs.ssh-host }}"
+        docker context use production
+        touch .env
+    - name: Capture Postgres backup
+      shell: sh
+      run: docker compose exec postgres /usr/bin/pg_dump -Rc -U postgres postgres > backup.dump
+    - name: Upload Postgres backup artifact
+      uses: actions/upload-artifact@v6
+      with:
+        name: backup.dump
+        path: backup.dump
