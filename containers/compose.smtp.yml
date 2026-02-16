@@ -1,6 +1,5 @@
 include:
-  - path:
-      - compose.web.yml
+  - compose.web.yml
 services:
   smtp:
     image: ghcr.io/docker-mailserver/docker-mailserver:15.1.0

@@ -1,6 +1,5 @@
 include:
-  - path:
-      - compose.web.yml
+  - compose.web.yml
 services:
   postgres:
     image: supabase/postgres:17.5.1.070-orioledb

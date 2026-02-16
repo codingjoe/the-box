@@ -1,6 +1,5 @@
 include:
-  - path:
-      - compose.web.yml
+  - compose.web.yml
 services:
   redis:
     image: redis:8.2.2-alpine
