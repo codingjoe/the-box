@@ -11,6 +11,7 @@ inputs:
     description: 'The SSH known hosts entry for the production server (e.g., "github.com ssh-rsa ...").'
     required: true
   SSH_PRIVATE_KEY:
+    description: 'The SSH private key to use for connecting to the production server. This should be stored as a secret in the repository.'
     required: true
 runs:
   using: "composite"
@@ -19,7 +20,9 @@ runs:
     - uses: webfactory/ssh-agent@v0.9.1
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    - uses: codingjoe/the-box/actions/compose@${{ github.ref_name }}
     - name: Pin known hosts
+      shell: sh
       run: |
         echo "::group::Pinning known hosts"
         echo "${{ inputs.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
@@ -27,11 +30,13 @@ runs:
         cat ~/.ssh/known_hosts
         echo "::endgroup::"
     - name: Setting up Docker context for remote deployment
+      shell: sh
       run: |
         docker context create production --description "Production Server" --docker "host=ssh://github@${{ inputs.SSH_HOSTNAME }}"
         docker context use production
         touch .env
     - name: Capture Postgres backup
+      shell: sh
       run: docker compose exec postgres /usr/bin/pg_dump -Rc -U postgres postgres > backup.dump
     - name: Upload Postgres backup artifact
       uses: actions/upload-artifact@v6
