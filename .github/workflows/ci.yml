@@ -51,8 +51,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compose-file:
-          - compose.yml
+        service:
+          - caddy
+          - postgres
+          - redis
+          - smtp
+          - web
     env:
       REGISTRY: ghcr.io
       IMAGE_NAME: ${{ github.repository }}
@@ -63,5 +67,5 @@ jobs:
         with:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker compose --file ${{ matrix.compose-file }} config --no-interpolate --no-path-resolution --no-env-resolution -o compose.full.yml
-      - run: docker compose --file compose.full.yml publish -y --dry-run test-the-box:${{ github.sha }}
+      - run: docker compose --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose.compiled.yml
+      - run: docker compose --file compose.compiled.yml publish -y --dry-run the-box-${{ matrix.service }}:${{ github.sha }}
