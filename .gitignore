@@ -213,4 +213,4 @@ node_modules/
 backups/
 
 # compiled compose artifacts
-compose.compiled.yml
+compose.*.compiled.yml
