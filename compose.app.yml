@@ -1,7 +1,6 @@
 include:
   - path:
       - containers/compose.web.yml
-      - containers/compose.smtp.yml
       - containers/compose.postgres.yml
       - containers/compose.redis.yml
       - containers/web/python/compose.yml

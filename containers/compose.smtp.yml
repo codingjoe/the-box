@@ -15,6 +15,8 @@ services:
       NETWORK_INTERFACE: eth1
       POSTFIX_INET_PROTOCOLS: ipv4
       LOG_LEVEL: info
+    deploy:
+      mode: global
     volumes:
       - smtp-data:/var/mail
       - smtp-state:/var/mail-state
@@ -31,7 +33,7 @@ services:
     networks:
       app:
         interface_name: eth1
-      wan:
+      smtp-wan:
         interface_name: eth0
     labels:
       dev.dozzle.group: PaaS
@@ -47,7 +49,6 @@ volumes:
   smtp-state:
   smtp-data:
 networks:
-  app:
-    external: true
-  wan:
-    external: true
+  smtp-wan:
+    name: smtp-wan
+    driver: bridge

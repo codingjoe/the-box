@@ -1,3 +1,0 @@
-{$HOSTNAME} {
-	reverse_proxy http://web:8000
-}

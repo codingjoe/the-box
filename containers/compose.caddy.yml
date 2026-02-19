@@ -1,7 +1,7 @@
 services:
   caddy:
     container_name: caddy
-    image: caddy:2.10.2-alpine
+    image: lucaslorentz/caddy-docker-proxy:2.10-alpine
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -10,6 +10,7 @@ services:
       - "443:443"
       - "443:443/udp"
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
       - caddy_data:/data
       - caddy_config:/config
@@ -17,10 +18,11 @@ services:
       - source: caddyfile
         target: /etc/caddy/Caddyfile
     networks:
-      - app
-      - wan
+      - caddy
+      - caddy-wan
     environment:
       HOSTNAME: ${HOSTNAME}
+    command: ["docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile"]
     healthcheck:
       test: ["CMD-SHELL", "caddy validate --config /etc/caddy/Caddyfile"]
     deploy:
@@ -28,13 +30,11 @@ services:
     labels:
       dev.dozzle.group: the-box
 networks:
-  app:
-    name: app
-    driver: bridge
+  caddy:
+    name: caddy
     internal: true
-  wan:
-    name: wan
-    driver: bridge
+    external: false
+  caddy-wan:
 volumes:
   caddy_data:
   caddy_config:
@@ -48,8 +48,6 @@ configs:
         }
       }
 
-      import /etc/caddy/*.caddy
-
       :80, :443 {
-        respond "Not Found" 404
+        respond "Misdirected Request" 421
       }
