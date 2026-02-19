@@ -25,8 +25,3 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres/postgres
 volumes:
   postgres:
-networks:
-  app:
-    external: true
-  wan:
-    external: true

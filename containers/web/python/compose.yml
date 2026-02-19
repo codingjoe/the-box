@@ -7,21 +7,10 @@ services:
       target: ${TARGET:-production}
       args:
         UV_NO_DEV: 0
-    restart: unless-stopped
     command: ["-m", "http.server"] # Run Python's built-in HTTP server module
-    networks:
-      - app
-      - wan
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://web:8000/')"]
       interval: 10s
       retries: 5
       start_period: 30s
       timeout: 10s
-    deploy:
-      mode: replicated
-      replicas: 2
-    stop_grace_period: 1m
-  caddy:
-    volumes:
-      - ../Caddyfile:/etc/caddy/app.caddy:ro
