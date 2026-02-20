@@ -21,7 +21,7 @@ services:
       - caddy
       - caddy-wan
     environment:
-      HOSTNAME: ${HOSTNAME}
+      CADDY_INGRESS_NETWORKS: caddy
     command: ["docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile"]
     healthcheck:
       test: ["CMD-SHELL", "caddy validate --config /etc/caddy/Caddyfile"]
