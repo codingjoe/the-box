@@ -21,7 +21,7 @@ runs:
   steps:
     - name: Get repository collaborators
       id: get-collaborators
-      shell: sh
+      shell: bash
       run: |
         echo "::group::Fetching collaborators"
         echo "::debug::Fetching collaborators for ${{ github.repository }}"
@@ -53,7 +53,7 @@ runs:
         GH_TOKEN: ${{ inputs.github-token }}
     - name: Fetch SSH keys for collaborators
       id: fetch-keys
-      shell: sh
+      shell: bash
       run: |
         echo "::group::Fetching SSH keys"
 
@@ -116,7 +116,7 @@ runs:
       with:
         ssh-private-key: ${{ inputs.ssh-private-key }}
     - name: Pin known hosts
-      shell: sh
+      shell: bash
       run: |
         echo "::group::Pinning known hosts"
         echo "${{ inputs.ssh-known-hosts }}" >> ~/.ssh/known_hosts
@@ -124,7 +124,7 @@ runs:
         cat ~/.ssh/known_hosts
         echo "::endgroup::"
     - name: Upload authorized_keys to remote host
-      shell: sh
+      shell: bash
       env:
         AUTHORIZED_KEYS: "${{ steps.fetch-keys.outputs.authorized_keys }}"
       run: |
@@ -136,7 +136,7 @@ runs:
 
         echo "::endgroup::"
     - name: Verify authorized_keys
-      shell: sh
+      shell: bash
       run: |
         echo "::group::Verifying authorized_keys on remote host"
         echo "::debug::Current authorized_keys on remote host:"

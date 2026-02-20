@@ -115,7 +115,7 @@ ssh -T "${ssh_username}@${hostname}" "sh -s -- '${ssh_public_key}'" < "bin/setup
 echo -en "${fin}"
 echo -e "${success_msg}Remote host setup completed!${fin}"
 echo -en "${action}Creating Docker context for remote host... "
-if docker context create "${project_name}" --description "The Box remote host for ${hostname}" --docker 'host=ssh://collaborator@${hostname}'; then
+if docker context create "${project_name}" --description "The Box remote host for ${hostname}" --docker "host=ssh://collaborator@${hostname}"; then
     docker context export "${project_name}" collaborator.dockercontext
     echo -e "${success_msg}SUCCESS${fin}"
 else

@@ -18,6 +18,6 @@ jobs:
       - uses: codingjoe/the-box/actions/sync-ssh-keys@main
         with:
           ssh-host: ${{ vars.SSH_HOSTNAME }}
-          ssh-kown-hosts: ${{ vars.SSH_KNOWN_HOSTS }}
+          ssh-known-hosts: ${{ vars.SSH_KNOWN_HOSTS }}
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          gh-token: ${{ github.token }}
+          github-token: ${{ github.token }}
