@@ -4,19 +4,19 @@ branding:
   icon: 'anchor'
   color: 'blue'
 inputs:
-  ssh_hostname:
+  ssh-host:
     description: 'The hostname or IP address of the production server (e.g., "example.com").'
     required: true
-  ssh_known_hosts:
+  ssh-known-hosts:
     description: 'The SSH known hosts entry for the production server (e.g., "github.com ssh-rsa ...").'
     required: true
   hostname:
     description: 'The hostname to use for the application (e.g., "example.com").'
     required: true
-  ssh_private_key:
+  ssh-private-key:
     description: 'The SSH private key to use for connecting to the production server. This should be stored as a secret in the repository.'
     required: true
-  dotenv_private_key:
+  dotenv-private-key:
     description: 'The private key to use for encrypting secrets in the .env file on the production server. This should be stored as a secret in the repository.'
     required: true
   project-name:
@@ -28,18 +28,18 @@ runs:
     - uses: actions/checkout@v6
     - uses: webfactory/ssh-agent@v0.9.1
       with:
-        ssh-private-key: ${{ inputs.ssh_private_key }}
+        ssh-private-key: ${{ inputs.ssh-private-key }}
     - name: Pin known hosts
       run: |
         echo "::group::Pinning known hosts"
-        echo "${{ inputs.ssh_known_hosts }}" >> ~/.ssh/known_hosts
+        echo "${{ inputs.ssh-known-hosts }}" >> ~/.ssh/known_hosts
         echo "::debug::Known hosts updated:"
         cat ~/.ssh/known_hosts
         echo "::endgroup::"
       shell: sh
     - name: Setting up Docker context for remote deployment
       run: |
-        docker context create production --description "Production Server" --docker "host=ssh://github@${{ inputs.ssh_hostname }}"
+        docker context create production --description "Production Server" --docker "host=ssh://github@${{ inputs.ssh-host }}"
         docker context use production
       shell: sh
     - uses: codingjoe/the-box/actions/compose@main
@@ -48,4 +48,4 @@ runs:
       shell: sh
       env:
         HOSTNAME: ${{ inputs.hostname }}
-        DOTENV_PRIVATE_KEY_PRODUCTION: ${{ inputs.dotenv_private_key }}
+        DOTENV_PRIVATE_KEY_PRODUCTION: ${{ inputs.dotenv-private-key }}

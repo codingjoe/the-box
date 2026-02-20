@@ -1,0 +1,23 @@
+name: Sync SSH Keys
+on:
+  schedule:
+    - cron: '0 * * * *' # Sync hourly
+  workflow_dispatch: # Allow manual trigger
+    inputs:
+      environment:
+        description: 'Target environment for syncing SSH keys'
+        required: true
+        default: 'production'
+permissions:
+  contents: read
+jobs:
+  sync-keys:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    steps:
+      - uses: codingjoe/the-box/actions/sync-ssh-keys@main
+        with:
+          ssh-host: ${{ vars.SSH_HOSTNAME }}
+          ssh-kown-hosts: ${{ vars.SSH_KNOWN_HOSTS }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          gh-token: ${{ github.token }}

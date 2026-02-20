@@ -1,0 +1,17 @@
+name: Backup
+on:
+  schedule:
+    - cron: '0 0 * * *' # Sync daily at midnight
+  workflow_dispatch: # Allow manual trigger
+concurrency:
+  group: backup
+  cancel-in-progress: false
+jobs:
+  pg_dump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: codingjoe/the-box/actions/backup@main
+        with:
+          ssh-host: ${{ vars.SSH_HOSTNAME }}
+          ssh-known-hosts: ${{ vars.SSH_KNOWN_HOSTS }}
+          ssh-private-keys: ${{ secrets.SSH_PRIVATE_KEY }}
