@@ -43,8 +43,11 @@ runs:
         docker context use production
       shell: sh
     - uses: codingjoe/the-box/actions/compose@main
+    - name: Install dotenvx
+      shell: sh
+      run: sh <(curl -fsSL https://dotenvx.sh)
     - name: Deploy production containers
-      run: docker compose --file compose.yml --project-name ${{ inputs.project-name }}  up --detach --quiet-pull
+      run: dotenvx run --env-file .env.${{ inputs.project-name }} -- docker compose --file compose.yml --project-name ${{ inputs.project-name }}  up --detach --quiet-pull
       shell: sh
       env:
         HOSTNAME: ${{ inputs.hostname }}
