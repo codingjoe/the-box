@@ -74,6 +74,4 @@ else
     echo "Docker is already installed."
 fi
 
-
-
 echo "Remote host setup complete!"

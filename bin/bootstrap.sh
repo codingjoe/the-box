@@ -40,7 +40,7 @@ if ! command -v dotenvx >/dev/null 2>&1; then
 fi
 
 # org or user
-gh_owner=$(gh repo view --json owner -q '.owner.login')
+gh_user=$(gh api user --jq .login)
 
 # =============================================================================
 headline "The Box Installation Wizard"
@@ -54,7 +54,7 @@ hr
 
 # Domain name
 read -erp "Enter your domain name (e.g., example.com): " hostname
-project_name=$(sluggify "$(gh repo view --json name -q '.name')")
+project_name=$(sluggify "$hostname")
 
 # SSH username
 read -erp "Enter your SSH user name for ${hostname} (default: ${USER})?: " input_ssh_username
@@ -74,9 +74,11 @@ fi
 echo ""
 
 # GitHub owner
-read -erp "Enter your GitHub username or organization name (default: $gh_owner): " input_gh_owner
+read -erp "Enter your GitHub username or organization name (default: $gh_user): " input_gh_owner
 if [ -n "$input_gh_owner" ]; then
     gh_owner=$input_gh_owner
+else
+    gh_owner=$gh_user
 fi
 
 # Project name
@@ -84,6 +86,15 @@ read -erp "Enter your project name (default: ${project_name}): " input_project_n
 if [ -n "$input_project_name" ]; then
     project_name=$input_project_name
 fi
+
+# =============================================================================
+headline "SSH Key Setup"
+
+echo -en "Generating SSH key pair for deployment..."
+ssh_key_path="$(mktemp -d)"
+ssh-keygen -t ed25519 -C "The Box deployment key" -f "${ssh_key_path}/deploy_key" -N "" > /dev/null
+ssh_public_key=$(cat "${ssh_key_path}/deploy_key.pub")
+echo -e "${success_msg}SUCCESS${fin}"
 
 # =============================================================================
 headline "Please confirm the following information:"
@@ -98,13 +109,9 @@ echo "Press any key to start the installation, or Ctrl+C to cancel..."
 read -r confirm
 
 # =============================================================================
-headline "SSH Key Setup"
-
-echo -en "Generating SSH key pair for deployment..."
-ssh_key_path="$(mktemp -d)"
-ssh-keygen -t ed25519 -C "The Box deployment key" -f "${ssh_key_path}/deploy_key" -N "" > /dev/null
-ssh_public_key=$(cat "${ssh_key_path}/deploy_key.pub")
-echo -e "${success_msg}SUCCESS${fin}"
+headline "Creating GitHub repository from template"
+gh repo create --private --clone --template codingjoe/the-box "${project_name}"
+cd "${project_name}" || exit 1
 
 # =============================================================================
 headline "Setting up remote host"
@@ -160,5 +167,11 @@ cat >> .dtop.yml <<EOL
   - host: ssh://collaborator@${hostname}
     dozzle: https://logs.${hostname}/
 EOL
+
+if ! command -v uv >/dev/null 2>&1; then
+    echo "Installing uv..."
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+fi
+uv sync --dev
 
 echo "Setup complete! Your project ${project_name} is being deployed to ${hostname}."
