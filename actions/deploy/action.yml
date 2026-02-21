@@ -22,6 +22,10 @@ inputs:
   project-name:
     description: 'The project name to use for Docker Compose (e.g., "myapp"). This will be used as the prefix for container names and other resources.'
     required: true
+  file:
+    description: 'The path to the Docker Compose file to use for deployment (e.g., "docker-compose.prod.yml").'
+    required: false
+    default: 'compose.yml'
 runs:
   using: "composite"
   steps:
@@ -47,7 +51,7 @@ runs:
       shell: sh
       run: curl -fsSL https://dotenvx.sh | sh
     - name: Deploy production containers
-      run: dotenvx run --env-file .env.${{ inputs.project-name }} -- docker compose --file compose.yml --project-name ${{ inputs.project-name }}  up --detach --quiet-pull
+      run: dotenvx run --env-file .env.${{ inputs.project-name }} -- docker compose --file ${{ inputs.file }} --project-name ${{ inputs.project-name }}  up --detach --quiet-pull
       shell: sh
       env:
         HOSTNAME: ${{ inputs.hostname }}
