@@ -17,7 +17,9 @@ services:
         failure_action: rollback
         monitor: 1m
       restart_policy:
-        max_attempts: 10
+        condition: any
+        delay: 5s
+        max_attempts: 3
         window: 120s
     environment:
       PORT: ${PORT:-8000}
