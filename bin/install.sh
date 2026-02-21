@@ -125,6 +125,16 @@ else
   "
 fi
 
+# =============================================================================
+headline "Setting up your development environment"
+
+mv .env.example .env
+.dtop.yml <<EOL
+hosts:
+  - host: local
+  - host: ssh://collaborator@${hostname}
+EOL
+
 
 # =============================================================================
 headline "Setting your GitHub environment"
@@ -151,14 +161,5 @@ echo "Triggering deployment workflow..."
 gh workflow run deploy.yml --ref main
 
 echo -en "${fin}"
-
-# =============================================================================
-headline "Setting up your development environment"
-
-mv .env.example .env
-cat >> .dtop.yml <<EOL
-  - host: ssh://collaborator@${hostname}
-    dozzle: https://logs.${hostname}/
-EOL
 
 echo "Setup complete! Your project ${project_name} is being deployed to ${hostname}."

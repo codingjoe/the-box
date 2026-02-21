@@ -12,6 +12,7 @@ services:
           memory: 512M # Limit to 512MB of RAM
     environment:
       PORT: ${PORT:-8000}
+      HOSTNAME: ${HOSTNAME:-localhost}
     networks:
       - app
       - app-wan
@@ -23,6 +24,7 @@ services:
       caddy.reverse_proxy.health_uri: /
       caddy.reverse_proxy.health_headers.X-Forwarded-Host: ${HOSTNAME:-localhost}
       caddy.reverse_proxy.health_headers.X-Forwarded-Proto: https
+      caddy.cache: "{}"
 networks:
   app:
     driver: bridge

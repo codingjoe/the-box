@@ -1,5 +1,4 @@
 include:
   - path:
       - compose.app.yml
-      - containers/compose.smtp.yml
       - containers/compose.caddy.yml

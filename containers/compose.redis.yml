@@ -2,12 +2,12 @@ include:
   - compose.web.yml
 services:
   redis:
-    image: redis:8.2.2-alpine
+    image: valkey/valkey-bundle:9.0.0-alpine
     volumes:
       - redis:/data
     restart: unless-stopped
     environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      VALKEYCLI_AUTH: ${REDIS_PASSWORD}
     networks:
       - app
     healthcheck:
