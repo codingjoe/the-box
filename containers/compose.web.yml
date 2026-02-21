@@ -10,6 +10,15 @@ services:
         limits:
           cpus: '2' # Limit cores of the CPU
           memory: 512M # Limit to 512MB of RAM
+      update_config:
+        parallelism: 2
+        delay: 1m
+        order: start-first
+        failure_action: rollback
+        monitor: 1m
+      restart_policy:
+        max_attempts: 10
+        window: 120s
     environment:
       PORT: ${PORT:-8000}
       HOSTNAME: ${HOSTNAME:-localhost}
