@@ -2,12 +2,10 @@ include:
   - compose.web.yml
 services:
   redis:
-    image: valkey/valkey-bundle:9.0.0-alpine
+    image: redis:8.6.0-alpine
     volumes:
       - redis:/data
     restart: unless-stopped
-    environment:
-      VALKEYCLI_AUTH: ${REDIS_PASSWORD}
     networks:
       - app
     healthcheck:
@@ -16,6 +14,10 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
+    configs:
+      - source: redis.conf
+        target: /usr/local/etc/redis/redis.conf
+    command: ["redis-server", "--include", "/usr/local/etc/redis/redis.conf"]
   web:
     depends_on:
       redis:
@@ -25,3 +27,7 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis/
 volumes:
   redis:
+configs:
+  redis.conf:
+    content: |
+      requirepass ${REDIS_PASSWORD}
