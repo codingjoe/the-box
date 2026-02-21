@@ -12,6 +12,7 @@ services:
           memory: 512M # Limit to 512MB of RAM
     environment:
       PORT: ${PORT:-8000}
+      HOSTNAME: ${HOSTNAME:-localhost}
     networks:
       - app
       - app-wan
