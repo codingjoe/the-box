@@ -42,8 +42,6 @@ configs:
   caddyfile:
     content: |
       {
-        cache
-
         log {
           output stdout
           format json
