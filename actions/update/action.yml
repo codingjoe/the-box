@@ -13,9 +13,6 @@ inputs:
   ssh-private-key:
     description: 'The SSH private key to use for connecting to the production server. This should be stored as a secret in the repository.'
     required: true
-  dotenv-private-key:
-    description: 'The private key to use for decrypting secrets in the .env file on the production server. This should be stored as a secret in the repository.'
-    required: true
 runs:
   using: "composite"
   steps:
