@@ -16,6 +16,9 @@ inputs:
   dotenv-private-key:
     description: 'The private key to use for decrypting secrets in the .env file on the production server. This should be stored as a secret in the repository.'
     required: true
+  environment:
+    description: 'The target environment for deployment (e.g., "production"). This will be used to determine which .env file to use and can also be used for environment-specific configurations.'
+    required: true
   hostname:
     description: 'The domain to use for the application deployment (e.g., "example.com").'
     required: true
@@ -44,7 +47,7 @@ runs:
       shell: sh
       run: curl -fsSL https://dotenvx.sh | sh
     - name: Deploy application to the box
-      run: dotenvx run --env-file .env.${{ job.environment.name }} -- docker compose --file compose.${{ job.environment.name }}.yml --project-name ${{ github.ref_name }}  up --detach --quiet-pull
+      run: dotenvx run --env-file .env.${{ inputs.environment }} -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ github.ref_name }}  up --detach --quiet-pull
       shell: sh
       env:
         HOSTNAME: ${{ inputs.hostname }}
