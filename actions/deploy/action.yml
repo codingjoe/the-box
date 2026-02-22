@@ -10,22 +10,18 @@ inputs:
   ssh-known-hosts:
     description: 'The SSH known hosts entry for the production server (e.g., "github.com ssh-rsa ...").'
     required: true
-  hostname:
-    description: 'The hostname to use for the application (e.g., "example.com").'
-    required: true
   ssh-private-key:
     description: 'The SSH private key to use for connecting to the production server. This should be stored as a secret in the repository.'
     required: true
   dotenv-private-key:
     description: 'The private key to use for encrypting secrets in the .env file on the production server. This should be stored as a secret in the repository.'
     required: true
-  project-name:
-    description: 'The project name to use for Docker Compose (e.g., "myapp"). This will be used as the prefix for container names and other resources.'
+  environment:
+    description: 'The target environment for deployment (e.g., "production"). This will be used to determine which .env file to use and can also be used for environment-specific configurations.'
     required: true
-  file:
-    description: 'The path to the Docker Compose file to use for deployment (e.g., "docker-compose.prod.yml").'
-    required: false
-    default: 'compose.yml'
+  hostname:
+    description: 'The domain to use for the application deployment (e.g., "example.com").'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -43,16 +39,16 @@ runs:
       shell: sh
     - name: Setting up Docker context for remote deployment
       run: |
-        docker context create production --description "Production Server" --docker "host=ssh://github@${{ inputs.ssh-host }}"
-        docker context use production
+        docker context create the-box --description "The Box" --docker "host=ssh://github@${{ inputs.ssh-host }}"
+        docker context use the-box
       shell: sh
     - uses: codingjoe/the-box/actions/compose@main
     - name: Install dotenvx
       shell: sh
       run: curl -fsSL https://dotenvx.sh | sh
-    - name: Deploy production containers
-      run: dotenvx run --env-file .env.${{ inputs.project-name }} -- docker compose --file ${{ inputs.file }} --project-name ${{ inputs.project-name }}  up --detach --quiet-pull
+    - name: Deploy application to the box
+      run: dotenvx run --env-file .env.${{ inputs.environment }} -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ inputs.project-name }}  up --detach --quiet-pull
       shell: sh
       env:
         HOSTNAME: ${{ inputs.hostname }}
-        DOTENV_PRIVATE_KEY_PRODUCTION: ${{ inputs.dotenv-private-key }}
+        DOTENV_PRIVATE_KEY: ${{ inputs.dotenv-private-key }}
