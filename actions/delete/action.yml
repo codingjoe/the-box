@@ -1,8 +1,8 @@
-name: Deploy
-description: 'Deploy the application to the production server using Docker Compose. This action connects to the production server via SSH, sets up a Docker context, and runs the necessary Docker Compose commands to deploy the application.'
+name: Delete Deployment
+description: 'Delete the application deployment from the production server. This action will connect to the server via SSH, stop and remove the Docker containers associated with the application, and clean up any related resources. It uses the provided SSH credentials to securely access the server and execute the necessary commands to ensure a clean deletion of the deployment.'
 branding:
-  icon: 'anchor'
-  color: 'blue'
+  icon: 'sunset'
+  color: 'red'
 inputs:
   ssh-host:
     description: 'The hostname or IP address of the production server (e.g., "example.com").'
@@ -17,10 +17,10 @@ inputs:
     description: 'The private key to use for decrypting secrets in the .env file on the production server. This should be stored as a secret in the repository.'
     required: true
   environment:
-    description: 'The target environment for deployment (e.g., "production"). This will be used to determine which .env file to use and can also be used for environment-specific configurations.'
+    description: 'The target environment of deployment (e.g., "production"). This will be used to determine which .env file to use and can also be used for environment-specific configurations.'
     required: true
   hostname:
-    description: 'The domain to use for the application deployment (e.g., "example.com").'
+    description: 'The domain of the application deployment (e.g., "example.com").'
     required: true
 runs:
   using: "composite"
@@ -46,8 +46,8 @@ runs:
     - name: Install dotenvx
       shell: sh
       run: curl -fsSL https://dotenvx.sh | sh
-    - name: Deploy application to the box
-      run: dotenvx run --env-file .env.${{ inputs.environment }} -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ inputs.project-name }}  up --detach --quiet-pull
+    - name: Delete application deployment from the box
+      run: dotenvx run --env-file .env.${{ inputs.environment }} -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ inputs.project-name }}  down --volumes
       shell: sh
       env:
         HOSTNAME: ${{ inputs.hostname }}
