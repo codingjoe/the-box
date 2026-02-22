@@ -47,7 +47,7 @@ runs:
       shell: sh
       run: curl -fsSL https://dotenvx.sh | sh
     - name: Delete application deployment from the box
-      run: dotenvx run --env-file .env.${{ inputs.environment }} -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ inputs.project-name }}  down --volumes
+      run: dotenvx run --env-file .env.${{ inputs.environment }} -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ inputs.ref_name }}  down --volumes
       shell: sh
       env:
         HOSTNAME: ${{ inputs.hostname }}

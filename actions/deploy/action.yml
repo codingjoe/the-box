@@ -47,7 +47,7 @@ runs:
       shell: sh
       run: curl -fsSL https://dotenvx.sh | sh
     - name: Deploy application to the box
-      run: dotenvx run --env-file .env.${{ inputs.environment }} -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ inputs.project-name }}  up --detach --quiet-pull
+      run: dotenvx run --env-file .env.${{ inputs.environment }} -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ github.ref_name }}  up --detach --quiet-pull
       shell: sh
       env:
         HOSTNAME: ${{ inputs.hostname }}
