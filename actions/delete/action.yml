@@ -45,7 +45,9 @@ runs:
     - uses: codingjoe/the-box/actions/compose@main
     - name: Install dotenvx
       shell: sh
-      run: curl -fsSL https://dotenvx.sh | sh
+      run: |
+        curl -fsSL https://dotenvx.sh | sh
+        cp .env.${{ inputs.environment }} .env
     - name: Delete application deployment from the box
       run: dotenvx run --env-file .env.${{ inputs.environment }} -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ inputs.ref_name }}  down --volumes
       shell: sh
