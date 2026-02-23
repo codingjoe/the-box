@@ -30,11 +30,11 @@ services:
       - caddy
     labels:
       - "caddy=${HOSTNAME:-localhost}"
-      - "caddy.reverse_proxy: {{upstreams ${PORT:-8000}}}"
-      - "caddy.reverse_proxy.lb_policy: round_robin"
-      - "caddy.reverse_proxy.health_uri: /"
-      - "caddy.reverse_proxy.health_headers.X-Forwarded-Host: ${HOSTNAME:-localhost}"
-      - "caddy.reverse_proxy.health_headers.X-Forwarded-Proto: https"
+      - "caddy.reverse_proxy={{upstreams ${PORT:-8000}}}"
+      - "caddy.reverse_proxy.lb_policy=round_robin"
+      - "caddy.reverse_proxy.health_uri=/"
+      - "caddy.reverse_proxy.health_headers.X-Forwarded-Host=${HOSTNAME:-localhost}"
+      - "caddy.reverse_proxy.health_headers.X-Forwarded-Proto=https"
 networks:
   app:
     driver: overlay

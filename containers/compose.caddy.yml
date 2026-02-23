@@ -29,7 +29,7 @@ services:
     deploy:
       mode: global
     labels:
-      - "dev.dozzle.group: the-box"
+      - "dev.dozzle.group=the-box"
 networks:
   caddy:
     name: caddy

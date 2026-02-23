@@ -37,7 +37,7 @@ services:
       smtp-wan:
         interface_name: eth0
     labels:
-      - "dev.dozzle.group: the-box"
+      - "dev.dozzle.group=the-box"
   web:
     depends_on:
       smtp:
