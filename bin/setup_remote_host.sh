@@ -79,4 +79,4 @@ if ! docker info --format '{{.Swarm.LocalNodeState}}' | grep -q "active"; then
     sudo docker swarm init
     echo "Docker Swarm initialized."
 
-echo "Remote host setup complete!"
+    echo "Remote host setup complete!"
