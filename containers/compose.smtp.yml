@@ -51,4 +51,4 @@ volumes:
 networks:
   smtp-wan:
     name: smtp-wan
-    driver: bridge
+    driver: overlay
