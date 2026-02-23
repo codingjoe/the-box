@@ -1,3 +1,4 @@
+version: "3.8"
 include:
   - compose.web.yml
 services:
@@ -36,12 +37,11 @@ services:
       smtp-wan:
         interface_name: eth0
     labels:
-      dev.dozzle.group: PaaS
+      - "dev.dozzle.group: the-box"
   web:
     depends_on:
       smtp:
         condition: service_healthy
-        restart: true
     environment:
       EMAIL_URL: smtp://smtp:25/
 volumes:

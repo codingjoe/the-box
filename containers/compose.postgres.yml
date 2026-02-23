@@ -1,3 +1,4 @@
+version: "3.8"
 include:
   - compose.web.yml
 services:
@@ -20,7 +21,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-        restart: true
     environment:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres/postgres
 volumes:

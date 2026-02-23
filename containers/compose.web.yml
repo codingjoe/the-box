@@ -1,7 +1,7 @@
+version: "3.8"
 services:
   web:
     image: traefik/whoami:latest # placeholder image for OCI artifact
-    memswap_limit: 1g # Limit total memory usage (RAM + swap) to 1GB
     stop_grace_period: 1m # Allow up to 1 minute for graceful shutdown
     deploy:
       mode: replicated
@@ -29,12 +29,12 @@ services:
       - app-wan
       - caddy
     labels:
-      caddy: ${HOSTNAME:-localhost}
-      caddy.reverse_proxy: "{{upstreams ${PORT:-8000}}}"
-      caddy.reverse_proxy.lb_policy: round_robin
-      caddy.reverse_proxy.health_uri: /
-      caddy.reverse_proxy.health_headers.X-Forwarded-Host: ${HOSTNAME:-localhost}
-      caddy.reverse_proxy.health_headers.X-Forwarded-Proto: https
+      - "caddy=${HOSTNAME:-localhost}"
+      - "caddy.reverse_proxy: {{upstreams ${PORT:-8000}}}"
+      - "caddy.reverse_proxy.lb_policy: round_robin"
+      - "caddy.reverse_proxy.health_uri: /"
+      - "caddy.reverse_proxy.health_headers.X-Forwarded-Host: ${HOSTNAME:-localhost}"
+      - "caddy.reverse_proxy.health_headers.X-Forwarded-Proto: https"
 networks:
   app:
     driver: overlay

@@ -1,3 +1,4 @@
+version: "3.8"
 services:
   caddy:
     container_name: caddy
@@ -28,26 +29,18 @@ services:
     deploy:
       mode: global
     labels:
-      dev.dozzle.group: the-box
+      - "dev.dozzle.group: the-box"
 networks:
   caddy:
     name: caddy
     internal: true
     external: false
   caddy-wan:
+    name: caddy-wan
+    internal: false
 volumes:
   caddy_data:
   caddy_config:
 configs:
   caddyfile:
-    content: |
-      {
-        log {
-          output stdout
-          format json
-        }
-      }
-
-      :80, :443 {
-        respond "Misdirected Request" 421
-      }
+    file: ../Caddyfile
