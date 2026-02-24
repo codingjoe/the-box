@@ -2,7 +2,7 @@ version: "3.8"
 services:
   caddy:
     container_name: caddy
-    image: lucaslorentz/caddy-docker-proxy:2.10-alpine
+    image: codingjoe/the-box-caddy:latest
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
