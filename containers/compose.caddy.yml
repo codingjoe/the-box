@@ -25,7 +25,7 @@ services:
       CADDY_INGRESS_NETWORKS: caddy
     command: ["docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile"]
     healthcheck:
-      test: ["CMD-SHELL", "caddy validate --config /etc/caddy/Caddyfile"]
+      test: caddy validate --config /etc/caddy/Caddyfile
     deploy:
       mode: global
     labels:
@@ -43,4 +43,4 @@ volumes:
   caddy_config:
 configs:
   caddyfile:
-    file: ../Caddyfile
+    file: ./Caddyfile

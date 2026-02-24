@@ -19,8 +19,7 @@ services:
       timeout: 10s
   web:
     depends_on:
-      postgres:
-        condition: service_healthy
+      - postgres
     environment:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres/postgres
 volumes:

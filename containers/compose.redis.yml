@@ -21,8 +21,7 @@ services:
     command: ["redis-server", "--include", "/usr/local/etc/redis/redis.conf"]
   web:
     depends_on:
-      redis:
-        condition: service_healthy
+      - redis
     environment:
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis/
 volumes:
