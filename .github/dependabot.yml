@@ -2,14 +2,21 @@
 version: 2
 updates:
   - package-ecosystem: github-actions
-    directory: "/"
+    directories:
+      - "/"
+      - "/.github/workflows"
+      - "/actions/backup"
+      - "/actions/compose"
+      - "/actions/deploy"
+      - "/actions/delete"
+      - "/actions/sync-ssh-keys"
+      - "/actions/update"
     schedule:
       interval: daily
   - package-ecosystem: docker
     directories:
       - "/"
       - "/containers"
-      - "/containers/web/node"
-      - "/containers/web/python"
+      - "/containers/caddy"
     schedule:
       interval: daily

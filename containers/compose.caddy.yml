@@ -1,7 +1,8 @@
+version: "3.8"
 services:
   caddy:
     container_name: caddy
-    image: lucaslorentz/caddy-docker-proxy:2.10-alpine
+    image: codingjoe/the-box-caddy:latest
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -24,30 +25,22 @@ services:
       CADDY_INGRESS_NETWORKS: caddy
     command: ["docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile"]
     healthcheck:
-      test: ["CMD-SHELL", "caddy validate --config /etc/caddy/Caddyfile"]
+      test: caddy validate --config /etc/caddy/Caddyfile
     deploy:
       mode: global
     labels:
-      dev.dozzle.group: the-box
+      - "dev.dozzle.group=the-box"
 networks:
   caddy:
     name: caddy
     internal: true
     external: false
   caddy-wan:
+    name: caddy-wan
+    internal: false
 volumes:
   caddy_data:
   caddy_config:
 configs:
   caddyfile:
-    content: |
-      {
-        log {
-          output stdout
-          format json
-        }
-      }
-
-      :80, :443 {
-        respond "Misdirected Request" 421
-      }
+    file: ./Caddyfile
