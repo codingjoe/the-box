@@ -1,4 +1,4 @@
-FROM caddy:2.10.2-builder-alpine AS builder
+FROM caddy:2.11.1-builder-alpine AS builder
 
 RUN xcaddy build \
     --with github.com/lucaslorentz/caddy-docker-proxy/v2 \

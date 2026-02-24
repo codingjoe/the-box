@@ -43,7 +43,6 @@ jobs:
       - uses: actions/checkout@v6
       - uses: codingjoe/the-box/actions/compose@main
       - run: docker compose --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose.${{ matrix.service }}.compiled.yml
-      - run: docker stack config -c containers/compose.${{ matrix.service }}.yml
       - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish  --yes --dry-run ${{ github.actor }}/the-box-${{ matrix.service }}
       - uses: actions/upload-artifact@v6
         with:

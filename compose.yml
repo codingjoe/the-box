@@ -1,4 +1,3 @@
 include:
-  - path:
-      - compose.app.yml
-      - containers/compose.caddy.yml
+  - compose.app.yml
+  - oci://docker.io/codingjoe/the-box-caddy:latest
