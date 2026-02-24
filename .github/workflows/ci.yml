@@ -42,6 +42,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: codingjoe/the-box/actions/compose@main
+        with:
+          version: 1.29.2
       - run: docker compose --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose.${{ matrix.service }}.compiled.yml
       - run: docker stack config -c compose.${{ matrix.service }}.compiled.yml
       - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish  --yes --dry-run ${{ github.actor }}/the-box-${{ matrix.service }}
