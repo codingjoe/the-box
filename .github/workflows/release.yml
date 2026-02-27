@@ -30,7 +30,7 @@ jobs:
       - run: docker compose --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose.${{ matrix.service }}.compiled.yml
       - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish --yes ${{ github.actor }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
       - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish --yes ${{ github.actor }}/the-box-${{ matrix.service }}
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: compose.${{ matrix.service }}.yml
           path: compose.${{ matrix.service }}.compiled.yml
