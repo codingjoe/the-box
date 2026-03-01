@@ -37,9 +37,7 @@ services:
       caddy.reverse_proxy.health_headers.X-Forwarded-Proto: https
 networks:
   app:
-    driver: overlay
     internal: true
   app-wan:
-    driver: overlay
   caddy:
     external: true
