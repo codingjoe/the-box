@@ -3,6 +3,7 @@ services:
   caddy:
     container_name: caddy
     image: codingjoe/the-box-caddy:latest
+    pull_policy: always
     build:
       context: ./caddy
       dockerfile: Dockerfile
