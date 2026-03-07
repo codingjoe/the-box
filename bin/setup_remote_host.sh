@@ -74,4 +74,9 @@ else
     echo "Docker is already installed."
 fi
 
+echo "Initializing Docker Swarm..."
+if ! docker info --format '{{.Swarm.LocalNodeState}}' | grep -q "active"; then
+    sudo docker swarm init
+    echo "Docker Swarm initialized."
+fi
 echo "Remote host setup complete!"

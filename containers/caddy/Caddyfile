@@ -1,0 +1,11 @@
+{
+  cache
+  log {
+    output stdout
+    format json
+  }
+}
+
+:80, :443 {
+  respond "Misdirected Request" 421
+}
