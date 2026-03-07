@@ -7,6 +7,9 @@ on:
     types:
       - published
   workflow_dispatch:
+concurrency:
+  group: release
+  cancel-in-progress: false
 jobs:
   containers:
     name: Push Docker image to Docker Hub
