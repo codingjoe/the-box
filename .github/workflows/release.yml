@@ -44,7 +44,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-name: index.docker.io/${{ vars.DOCKER_USERNAME }}/the-box-${{ matrix.container }}
           subject-digest: ${{ steps.push.outputs.digest }}
