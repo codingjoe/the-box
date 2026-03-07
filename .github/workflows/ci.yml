@@ -34,16 +34,14 @@ jobs:
       fail-fast: false
       matrix:
         service:
-          - caddy
-          - postgres
-          - redis
-          - smtp
-          - web
+          - ""
+          - -postgres
+          - -redis
     steps:
       - uses: actions/checkout@v6
       - uses: codingjoe/the-box/actions/compose@main
-      - run: docker compose --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose.${{ matrix.service }}.compiled.yml
-      - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish  --yes --dry-run ${{ github.actor }}/the-box-${{ matrix.service }}
+      - run: docker compose --file containers/compose${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose${{ matrix.service }}.compiled.yml
+      - run: docker compose --file compose${{ matrix.service }}.compiled.yml publish --yes --dry-run ${{ github.actor }}/the-box${{ matrix.service }}:${{ github.ref_name }}
       - uses: actions/upload-artifact@v7
         with:
           name: compose.${{ matrix.service }}.yml
