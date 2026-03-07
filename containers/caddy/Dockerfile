@@ -10,6 +10,5 @@ LABEL license="BSD-2-Clause"
 LABEL url="https://github.com/codingjoe/the-box"
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
-COPY Caddyfile /etc/caddy/Caddyfile
 
 CMD ["caddy", "docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile"]
