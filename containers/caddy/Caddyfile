@@ -1,4 +1,5 @@
 {
+  cache
   log {
     output stdout
     format json

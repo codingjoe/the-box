@@ -3,6 +3,9 @@ services:
   caddy:
     container_name: caddy
     image: codingjoe/the-box-caddy:latest
+    build:
+      context: ./caddy
+      dockerfile: Dockerfile
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -15,9 +18,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - caddy_data:/data
       - caddy_config:/config
-    configs:
-      - source: caddyfile
-        target: /etc/caddy/Caddyfile
     networks:
       - caddy
       - caddy-wan
@@ -41,6 +41,3 @@ networks:
 volumes:
   caddy_data:
   caddy_config:
-configs:
-  caddyfile:
-    file: ./Caddyfile
