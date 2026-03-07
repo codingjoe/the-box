@@ -5,7 +5,7 @@ RUN xcaddy build \
     --with github.com/caddyserver/cache-handler
 
 RUN echo $PATH
-RUN which caddy-proxy
+RUN command -v caddy || true
 
 FROM caddy:2.11.2-alpine
 LABEL title="Caddy reverse proxy"
