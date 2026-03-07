@@ -1,3 +1,7 @@
+> [!WARNING]
+> This project is still under heavy development including breaking changes.
+> Leave a star ⭐ until this reaches full maturity.
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="./images/logo-dark.svg">
