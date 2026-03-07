@@ -34,5 +34,5 @@ runs:
       shell: sh
     - uses: codingjoe/the-box/actions/compose@main
     - name: Deploy application to the box
-      run: docker compose --file oci://docker.io/codingjoe/the-box:latest --project-name the-box up --detach --pull --quiet-pull
+      run: docker compose --file oci://docker.io/codingjoe/the-box:latest --project-name the-box up --detach --pull always --quiet-pull
       shell: sh
