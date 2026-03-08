@@ -67,7 +67,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: codingjoe/the-box/actions/compose@main
-      - run: docker stack config --skip-interpolation -c containers/compose-web.yml -c containers/compose.${{ matrix.service }}.yml > compose.${{ matrix.service }}.compiled.yml
+      - run: docker stack config --skip-interpolation -c containers/compose.web.yml -c containers/compose.${{ matrix.service }}.yml > compose.${{ matrix.service }}.compiled.yml
       - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish --yes ${{ github.actor }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
       - uses: actions/upload-artifact@v7
         with:
