@@ -33,9 +33,8 @@ runs:
         docker context use the-box
       shell: sh
     - uses: codingjoe/the-box/actions/compose@main
-    - run: compose.yml
+    - run: download.sh
       shell: sh
-      if: ${{ !always() }}
     - name: Deploy application to the box
       run: docker compose -f compose.yml --project-name the-box up --detach --pull always --quiet-pull
       shell: sh
