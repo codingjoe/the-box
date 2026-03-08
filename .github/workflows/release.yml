@@ -55,17 +55,15 @@ jobs:
           subject-name: index.docker.io/${{ vars.DOCKER_USERNAME }}/the-box-${{ matrix.container }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
-  oci-artifacts:
+  oci-artifacts-app:
     name: OCI artifact
-    needs: containers
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         service:
-          - ""
-          - -postgres
-          - -redis
+          - postgres
+          - redis
     steps:
       - uses: actions/checkout@v6
       - uses: docker/login-action@v4
@@ -73,10 +71,25 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - uses: codingjoe/the-box/actions/compose@main
-      - run: docker compose --file containers/compose${{ matrix.service }}.yml config --no-interpolate --no-path-resolution --no-env-resolution -o compose${{ matrix.service }}.compiled.yml
-      - run: docker compose --file compose${{ matrix.service }}.compiled.yml publish --yes ${{ github.actor }}/the-box${{ matrix.service }}:${{ github.ref_name }}
-      - run: docker compose --file compose${{ matrix.service }}.compiled.yml publish --yes ${{ github.actor }}/the-box${{ matrix.service }}
+      - run: docker stack config --skip-interpolation -c containers/compose.web.yml -c containers/compose.${{ matrix.service }}.yml > compose.${{ matrix.service }}.compiled.yml
+      - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish --yes ${{ github.actor }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
       - uses: actions/upload-artifact@v7
         with:
           name: compose.${{ matrix.service }}.yml
           path: compose.${{ matrix.service }}.compiled.yml
+  oci-artifacts-box:
+    name: OCI artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - uses: codingjoe/the-box/actions/compose@main
+      - run: docker stack config --skip-interpolation -c containers/compose.yml > compose.compiled.yml
+      - run: docker compose --file compose.compiled.yml publish --yes ${{ github.actor }}/the-box:${{ github.ref_name }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: compose.yml
+          path: compose.compiled.yml

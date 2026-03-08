@@ -1,6 +1,4 @@
 version: "3.8"
-include:
-  - compose-web.yml
 services:
   postgres:
     image: supabase/postgres:17.5.1.070-orioledb
