@@ -33,6 +33,10 @@ runs:
         docker context use the-box
       shell: sh
     - uses: codingjoe/the-box/actions/compose@main
+    - name: Install dotenvx
+      shell: sh
+      run: |
+        ls -lah
     - name: Deploy application to the box
       run: docker compose --project-name the-box up --detach --pull always --quiet-pull
       shell: sh
