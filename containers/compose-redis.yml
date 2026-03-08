@@ -1,6 +1,4 @@
 version: "3.8"
-include:
-  - compose-web.yml
 services:
   redis:
     image: redis:8.6.0-alpine

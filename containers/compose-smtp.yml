@@ -1,6 +1,4 @@
 version: "3.8"
-include:
-  - compose-web.yml
 services:
   smtp:
     image: ghcr.io/docker-mailserver/docker-mailserver:15.1.0
