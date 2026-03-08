@@ -13,10 +13,7 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
-    configs:
-      - source: redis.conf
-        target: /usr/local/etc/redis/redis.conf
-    command: ["redis-server", "--include", "/usr/local/etc/redis/redis.conf"]
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
   web:
     depends_on:
       - redis
@@ -24,7 +21,3 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD}@redis/
 volumes:
   redis:
-configs:
-  redis.conf:
-    content: |
-      requirepass ${REDIS_PASSWORD}
