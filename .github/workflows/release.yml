@@ -57,6 +57,7 @@ jobs:
           push-to-registry: true
   oci-artifacts-app:
     name: OCI artifact
+    needs: [containers]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -79,6 +80,7 @@ jobs:
           path: compose.${{ matrix.service }}.compiled.yml
   oci-artifacts-box:
     name: OCI artifact
+    needs: [containers]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
