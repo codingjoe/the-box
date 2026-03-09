@@ -39,7 +39,7 @@ runs:
       shell: sh
       run: docker compose exec postgres /usr/bin/pg_dump -Rc -U postgres postgres > backup.dump
     - name: Upload Postgres backup artifact
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       with:
         name: backup.dump
         path: backup.dump
