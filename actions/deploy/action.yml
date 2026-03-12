@@ -26,7 +26,7 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v6
-    - uses: webfactory/ssh-agent@v0.9.1
+    - uses: webfactory/ssh-agent@v0.10.0
       with:
         ssh-private-key: ${{ inputs.ssh-private-key }}
     - name: Pin known hosts
