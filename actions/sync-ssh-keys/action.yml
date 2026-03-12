@@ -112,7 +112,7 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github-token }}
     - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.9.1
+      uses: webfactory/ssh-agent@v0.10.0
       with:
         ssh-private-key: ${{ inputs.ssh-private-key }}
     - name: Pin known hosts
