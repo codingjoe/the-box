@@ -1,4 +1,4 @@
-FROM caddy:2.11.3-builder-alpine AS builder
+FROM caddy:2.11.4-builder-alpine AS builder
 
 
 RUN --mount=type=cache,target=/go/pkg/mod \
@@ -9,7 +9,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --with github.com/caddyserver/cache-handler
 
 
-FROM caddy:2.11.3-alpine
+FROM caddy:2.11.4-alpine
 LABEL title="Caddy reverse proxy"
 LABEL license="BSD-2-Clause"
 LABEL url="https://github.com/codingjoe/the-box"
