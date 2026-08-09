@@ -10,6 +10,17 @@ services:
     networks:
       - app
       - caddy
+    labels:
+      - "caddy_0=pg.${HOSTNAME:-localhost}"
+      - "caddy_0.respond=OK 200"
+      - "caddy_1.layer4.:5432.@pg_tls.postgres.tls=enabled"
+      - "caddy_1.layer4.:5432.route_0=@pg_tls"
+      - "caddy_1.layer4.:5432.route_0.postgres_tls="
+      - "caddy_1.layer4.:5432.route_0.tls="
+      - "caddy_1.layer4.:5432.route_0.proxy={{upstreams 5432}}"
+      - "caddy_1.layer4.:5432.@pg_plain.postgres.tls=disabled"
+      - "caddy_1.layer4.:5432.route_1=@pg_plain"
+      - "caddy_1.layer4.:5432.route_1.proxy={{upstreams 5432}}"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 10s
