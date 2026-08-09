@@ -110,8 +110,8 @@ echo -e "${success_msg}SUCCESS${fin}"
 headline "Setting up remote host"
 
 echo -en "${action}"
-# Run remote setup script
-ssh -T "${ssh_username}@${hostname}" "sh -s -- '${ssh_public_key}'" < "bin/setup_remote_host.sh"
+# Download and run remote setup script
+curl -fsSL "https://raw.githubusercontent.com/codingjoe/the-box/refs/heads/main/bin/setup_remote_host.sh" | ssh -T "${ssh_username}@${hostname}" "sh -s -- '${ssh_public_key}'"
 echo -en "${fin}"
 echo -e "${success_msg}Remote host setup completed!${fin}"
 echo -en "${action}Creating Docker context for remote host... "
