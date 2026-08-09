@@ -4,6 +4,7 @@ set -eu
 
 # Script to set up a remote host for deployment
 # This script is designed to be executed on the remote host (piped via SSH)
+# It is idempotent: safe to run multiple times on the same host.
 # Usage: cat setup_remote_host.sh | ssh user@host sh -s -- <ssh_public_key>
 
 if [ "$#" -ne 1 ]; then
@@ -37,10 +38,10 @@ sudo chmod 700 /home/github/.ssh
 sudo chown github:github /home/github/.ssh
 
 echo "Setting up SSH key for github user..."
-echo "${ssh_public_key}" | sudo tee /home/github/.ssh/authorized_keys > /dev/null
+echo "${ssh_public_key}" | sudo tee -a /home/github/.ssh/authorized_keys > /dev/null
 sudo chmod 600 /home/github/.ssh/authorized_keys
 sudo chown github:github /home/github/.ssh/authorized_keys
-echo "SSH key configured for github user."
+echo "SSH key appended for github user."
 
 echo "Setting up collaborator user..."
 if ! id collaborator >/dev/null 2>&1; then
