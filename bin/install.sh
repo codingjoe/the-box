@@ -133,7 +133,7 @@ dotenvx set HOSTNAME "$hostname" -p
 dotenvx set POSTGRES_PASSWORD "$(python -c "import secrets; print(secrets.token_urlsafe())")" -p
 dotenvx set REDIS_PASSWORD "$(python -c "import secrets; print(secrets.token_urlsafe())")" -p
 
-.dtop.yml <<EOL
+cat <<EOL > .dtop.yml
 hosts:
   - host: local
   - host: ssh://collaborator@${hostname}
