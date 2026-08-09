@@ -4,8 +4,30 @@
     output stdout
     format json
   }
+  layer4 {
+    :5432 {
+      @pg_tls postgres {
+        tls enabled
+      }
+      route @pg_tls {
+        postgres_tls
+        tls
+        proxy postgres:5432
+      }
+      @pg_plain postgres {
+        tls disabled
+      }
+      route @pg_plain {
+        proxy postgres:5432
+      }
+    }
+  }
 }
 
 :80, :443 {
   respond "Misdirected Request" 421
+}
+
+https://pg.{$HOSTNAME} {
+  respond "OK" 200
 }

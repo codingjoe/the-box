@@ -13,6 +13,7 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
+      - "5432:5432"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
@@ -23,6 +24,7 @@ services:
       - caddy-wan
     environment:
       CADDY_INGRESS_NETWORKS: caddy
+      HOSTNAME: ${HOSTNAME}
     command: ["docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile"]
     healthcheck:
       test: caddy validate --config /etc/caddy/Caddyfile

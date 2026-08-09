@@ -13,6 +13,16 @@ The default variables are set:
 - `REDIS_URL`: The URL for your Redis instance.
 - `EMAIL_URL`: The URL to your SMTP relay instance.
 
+## External database access
+
+PostgreSQL is exposed on port `5432` through the Caddy reverse proxy, which terminates TLS with a signed certificate. Connect from outside the Docker host with:
+
+```bash
+psql "postgresql://postgres:${POSTGRES_PASSWORD}@pg.${HOSTNAME}:5432/postgres?sslmode=require"
+```
+
+The proxy accepts both classic `SSLRequest` negotiation and plaintext connections.
+
 ## Managing variables
 
 GitHub can store multiple environments for a single repository. Each environment can have its own set of variables and secrets. You can create environments such as `development`, `staging`, and `production` to manage different configurations for each stage of your application lifecycle.
