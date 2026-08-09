@@ -114,16 +114,6 @@ echo -en "${action}"
 curl -fsSL "https://raw.githubusercontent.com/codingjoe/the-box/refs/heads/main/bin/setup_remote_host.sh" | ssh -T "${ssh_username}@${hostname}" "sh -s -- '${ssh_public_key}'"
 echo -en "${fin}"
 echo -e "${success_msg}Remote host setup completed!${fin}"
-echo -en "${action}Creating Docker context for remote host... "
-if docker context create "${project_name}" --description "The Box remote host for ${hostname}" --docker "host=ssh://collaborator@${hostname}"; then
-    docker context export "${project_name}" collaborator.dockercontext
-    echo -e "${success_msg}SUCCESS${fin}"
-else
-    echo -e "${error}FAILED${fin}"
-    echo "Make sure you have Docker installed locally, next you can run:
-  docker context create \"${project_name}\" --description \"The Box remote host for ${hostname}\" --docker \"host=ssh://collaborator@${hostname}\"
-  "
-fi
 
 # =============================================================================
 headline "Setting up your development environment"
@@ -133,11 +123,11 @@ dotenvx set HOSTNAME "$hostname" -p
 dotenvx set POSTGRES_PASSWORD "$(python -c "import secrets; print(secrets.token_urlsafe())")" -p
 dotenvx set REDIS_PASSWORD "$(python -c "import secrets; print(secrets.token_urlsafe())")" -p
 
-cat <<EOF> .dtop.yml
+cat <<EOL > .dtop.yml
 hosts:
   - host: local
   - host: ssh://collaborator@${hostname}
-EOF
+EOL
 
 
 # =============================================================================
@@ -160,10 +150,8 @@ dotenvx get DOTENV_PRIVATE_KEY_PRODUCTION -f .env.keys | gh secret set DOTENV_PR
 
 echo "Syncing collaborator SSH keys..."
 gh workflow run sync-ssh-keys.yml --ref main
-
-echo "Triggering deployment workflow..."
-gh workflow run deploy.yml --ref main
-
 echo -en "${fin}"
+
+git add .env.production .dtop.yml
 
 echo "Setup complete! Your project ${project_name} is being deployed to ${hostname}."
