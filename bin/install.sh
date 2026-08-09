@@ -136,6 +136,7 @@ headline "Setting your GitHub environment"
 echo -en "${action}"
 
 echo "Configuring repository workflow secrets on GitHub..."
+gh variable set HOSTNAME --body "$hostname" --env production
 gh variable set SSH_HOSTNAME --body "$hostname"
 gh variable set SSH_KNOWN_HOSTS --body "$(ssh-keyscan "${hostname}")"
 gh variable set SSH_PUBLIC_KEY < "${ssh_key_path}/deploy_key.pub"
