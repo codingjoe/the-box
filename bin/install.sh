@@ -128,7 +128,11 @@ fi
 # =============================================================================
 headline "Setting up your development environment"
 
-mv .env.example .env
+touch .env
+dotenvx set HOSTNAME "$hostname" -p
+dotenvx set POSTGRES_PASSWORD "$(python -c "import secrets; print(secrets.token_urlsafe())")" -p
+dotenvx set REDIS_PASSWORD "$(python -c "import secrets; print(secrets.token_urlsafe())")" -p
+
 .dtop.yml <<EOL
 hosts:
   - host: local
