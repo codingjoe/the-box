@@ -59,7 +59,7 @@ runs:
         BACKUP_PUBLIC_KEY_PATH: ${{ inputs.backup-public-key-path }}
       run: |
         if [ ! -s "$BACKUP_PUBLIC_KEY_PATH" ]; then
-          echo "Public key file '$BACKUP_PUBLIC_KEY_PATH' is missing or empty. Generate a GPG key pair and commit the public key to the repository."
+          echo "::error::Public key file '$BACKUP_PUBLIC_KEY_PATH' is missing or empty. Generate a GPG key pair and commit the public key to the repository."
           exit 1
         fi
         gpg --import "$BACKUP_PUBLIC_KEY_PATH"
