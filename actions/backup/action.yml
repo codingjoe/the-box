@@ -5,13 +5,19 @@ branding:
 description: 'Capture a backup of the PostgreSQL database and upload it as an artifact'
 inputs:
   ssh-host:
-    description: 'The hostname or IP address of the production server.'
+    description: 'The hostname or IP address of the production server (e.g., "example.com").'
     required: true
   ssh-known-hosts:
     description: 'The SSH known hosts entry for the production server (e.g., "github.com ssh-rsa ...").'
     required: true
   ssh-private-key:
     description: 'The SSH private key to use for connecting to the production server. This should be stored as a secret in the repository.'
+    required: true
+  dotenv-private-key:
+    description: 'The private key to use for decrypting secrets in the .env file on the production server. This should be stored as a secret in the repository.'
+    required: true
+  environment:
+    description: 'The target environment for the backup (e.g., "production"). This determines which .env and compose file to use.'
     required: true
 runs:
   using: "composite"
@@ -20,24 +26,30 @@ runs:
     - uses: webfactory/ssh-agent@v0.10.0
       with:
         ssh-private-key: ${{ inputs.ssh-private-key }}
-    - uses: codingjoe/the-box/actions/compose@main
     - name: Pin known hosts
-      shell: sh
       run: |
         echo "::group::Pinning known hosts"
         echo "${{ inputs.ssh-known-hosts }}" >> ~/.ssh/known_hosts
         echo "::debug::Known hosts updated:"
         cat ~/.ssh/known_hosts
         echo "::endgroup::"
+      shell: sh
     - name: Setting up Docker context for remote deployment
+      run: |
+        docker context create the-box --description "The Box" --docker "host=ssh://github@${{ inputs.ssh-host }}"
+        docker context use the-box
+      shell: sh
+    - uses: codingjoe/the-box/actions/compose@main
+    - name: Install dotenvx
       shell: sh
       run: |
-        docker context create production --description "Production Server" --docker "host=ssh://github@${{ inputs.ssh-host }}"
-        docker context use production
-        touch .env
+        curl -fsSL https://dotenvx.sh | sh
+        cp .env.${{ inputs.environment }} .env
     - name: Capture Postgres backup
       shell: sh
-      run: docker compose exec postgres /usr/bin/pg_dump -Rc -U postgres postgres > backup.dump
+      run: dotenvx run -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ github.event.repository.name }}-${{ github.event.ref || github.ref_name }} exec postgres /usr/bin/pg_dump -Rc -U postgres postgres > backup.dump
+      env:
+        DOTENV_PRIVATE_KEY: ${{ inputs.dotenv-private-key }}
     - name: Upload Postgres backup artifact
       uses: actions/upload-artifact@v7
       with:
