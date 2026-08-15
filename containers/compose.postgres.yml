@@ -18,12 +18,11 @@ services:
     labels:
       - "caddy=pg.${HOSTNAME:-localhost}"
       - "caddy.respond=OK"
-      - 'caddy_1.servers.listener_wrappers.0_layer4.@tls-pgsql=tls'
-      - 'caddy_1.servers.listener_wrappers.0_layer4.@tls-pgsql.alpn=postgresql'
-      - 'caddy_1.servers.listener_wrappers.0_layer4.@tls-pgsql.sni=pg.${HOSTNAME:-localhost}'
-      - 'caddy_1.servers.listener_wrappers.0_layer4.route=@tls-pgsql'
-      - 'caddy_1.servers.listener_wrappers.0_layer4.route.0_tls.connection_policy.alpn=postgresql'
-      - 'caddy_1.servers.listener_wrappers.0_layer4.route.1_proxy={{upstreams 5432}}'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.@pg_tls.postgres.tls=enabled'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.route_0=@pg_tls'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.route_0.0_postgres_tls='
+      - 'caddy_1.servers.listener_wrappers.0_layer4.route_0.1_tls.connection_policy.alpn=postgresql'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.route_0.2_proxy={{upstreams 5432}}'
       - 'caddy_1.servers.listener_wrappers.1_tls='
   web:
     depends_on:
