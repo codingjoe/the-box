@@ -6,10 +6,10 @@ The Box creates daily encrypted PostgreSQL backups and stores them as GitHub Act
 
 The install script (`bin/install.sh`) handles key generation during setup. It creates a GPG key pair unique to your repository and exports:
 
-- **`keys/backup.pub`** — the public key, committed to your repository. The backup workflow uses it to encrypt dumps.
-- **`keys/backup-private.key`** — the private key, saved locally. You need it to restore backups. It is git-ignored and never stored on GitHub.
+- **`.box/backup.pub`** — the public key, committed to your repository. The backup workflow uses it to encrypt dumps.
+- **`.box/backup-private.key`** — the private key, saved locally. You need it to restore backups. It is git-ignored and never stored on GitHub.
 
-Keep `keys/backup-private.key` safe. Without it, backups cannot be restored.
+Keep `.box/backup-private.key` safe. Without it, backups cannot be restored.
 
 ## Downloading a backup
 

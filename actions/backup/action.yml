@@ -21,7 +21,7 @@ inputs:
     required: true
   backup-public-key-path:
     description: 'Path to the age public key file used to encrypt the backup. The public key is stored in the repository.'
-    default: 'keys/backup.pub'
+    default: '.box/backup.pub'
 runs:
   using: "composite"
   steps:

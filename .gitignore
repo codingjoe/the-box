@@ -213,7 +213,7 @@ node_modules/
 backups/
 
 # Backup encryption private keys
-keys/*.key
+.box/*.key
 
 # compiled compose artifacts
 compose.*.compiled.yml

@@ -156,7 +156,7 @@ dotenvx set REDIS_PASSWORD "$(python -c "import secrets; print(secrets.token_url
 dotenvx get DOTENV_PRIVATE_KEY_PRODUCTION -f .env.keys | gh secret set DOTENV_PRIVATE_KEY_PRODUCTION
 
 echo "Generating backup encryption key pair..."
-mkdir -p keys
+mkdir -p .box
 gpg_email="backup@${gh_owner}-${project_name}"
 gpg --batch --full-generate-key <<EOF
 %no-protection
@@ -167,9 +167,9 @@ Name-Email: ${gpg_email}
 Expire-Date: 0
 %commit
 EOF
-gpg --export --armor "$gpg_email" > keys/backup.pub
-gpg --export-secret-keys --armor "$gpg_email" > keys/backup-private.key
-echo -e "${success_msg}IMPORTANT:${fin} Save keys/backup-private.key in a safe place."
+gpg --export --armor "$gpg_email" > .box/backup.pub
+gpg --export-secret-keys --armor "$gpg_email" > .box/backup-private.key
+echo -e "${success_msg}IMPORTANT:${fin} Save .box/backup-private.key in a safe place."
 echo "You need it to decrypt and restore backups. It is not stored on GitHub."
 echo "To restore on another machine: gpg --import <path-to>/backup-private.key"
 
@@ -177,6 +177,6 @@ echo "Syncing collaborator SSH keys..."
 gh workflow run sync-ssh-keys.yml --ref main
 echo -en "${fin}"
 
-git add .env.production .dtop.yml keys/backup.pub
+git add .env.production .dtop.yml .box/backup.pub
 
 echo "Setup complete! Your project ${project_name} is being deployed to ${hostname}."
