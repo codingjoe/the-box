@@ -25,6 +25,11 @@ gpg_email="backup@${gh_owner}-${project_name}"
 
 mkdir -p .box
 
+# Ensure the private key is gitignored so it never gets committed.
+if ! grep -qx '.box/\*.key' .gitignore 2>/dev/null; then
+    printf '\n# Backup encryption private keys\n.box/*.key\n' >> .gitignore
+fi
+
 gpg --batch --full-generate-key <<EOF
 %no-protection
 Key-Type: RSA
@@ -43,11 +48,9 @@ if [ ! -s .box/backup.pub ]; then
     exit 1
 fi
 
-git add .box/backup.pub
-git commit -m "Add backup encryption public key"
-
 echo -e "${success_msg}SUCCESS${fin}"
 echo -e "${error}WARNING:${fin} Save .box/backup-private.key in a safe place."
 echo "You need it to decrypt and restore backups. It is not stored on GitHub."
 echo "To import on another machine: gpg --import <path-to>/backup-private.key"
-echo "Push the commit to GitHub: git push"
+echo "Add and commit the public key yourself:"
+echo "  git add .box/backup.pub && git commit -m 'Add backup encryption public key'"
