@@ -48,9 +48,11 @@ if [ ! -s .box/backup.pub ]; then
     exit 1
 fi
 
+git add .box/backup.pub
+
 echo -e "${success_msg}SUCCESS${fin}"
 echo -e "${error}WARNING:${fin} Save .box/backup-private.key in a safe place."
 echo "You need it to decrypt and restore backups. It is not stored on GitHub."
 echo "To import on another machine: gpg --import <path-to>/backup-private.key"
-echo "Add and commit the public key yourself:"
-echo "  git add .box/backup.pub && git commit -m 'Add backup encryption public key'"
+echo "Commit the public key yourself:"
+echo "  git commit -m 'Add backup encryption public key'"
