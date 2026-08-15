@@ -50,7 +50,7 @@ runs:
         cp .env.${{ inputs.environment }} .env
     - name: Capture Postgres backup
       shell: sh
-      run: dotenvx run -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ github.event.repository.name }}-${{ github.ref_name }} exec postgres /usr/bin/pg_dump -Rc -U postgres postgres > backup.dump
+      run: dotenvx run -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ github.event.repository.name }}-${{ github.ref_name }} exec postgres /usr/bin/pg_dump -Fc -U postgres postgres > backup.dump
       env:
         DOTENV_PRIVATE_KEY: ${{ inputs.dotenv-private-key }}
     - name: Encrypt backup
