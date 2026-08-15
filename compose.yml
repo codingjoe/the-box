@@ -2,3 +2,9 @@ include:
   - compose.app.yml
   - containers/compose.yml
   - containers/compose.web.yml
+services:
+  caddy:
+    build:
+      context: ./containers/caddy
+      dockerfile: Dockerfile
+    pull_policy: build

@@ -20,3 +20,9 @@ updates:
       - "/containers/caddy"
     schedule:
       interval: daily
+  - package-ecosystem: docker-compose
+    directories:
+      - "/"
+      - "/containers"
+    schedule:
+      interval: daily
