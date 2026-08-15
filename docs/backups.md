@@ -2,33 +2,60 @@
 
 ## Database backups
 
-PostgreSQL backups are captured daily using [pg_dump](https://www.postgresql.org/docs/current/app-pgdump.html) and stored as repository artifacts in GitHub Actions.
+The Box captures PostgreSQL backups daily using [pg_dump](https://www.postgresql.org/docs/current/app-pgdump.html) and stores them as repository artifacts in GitHub Actions. The Box encrypts each backup with PGP before upload.
 
 ### Durability
 
 By default, GitHub retains workflow artifacts for 90 days. You can [adjust the retention period](https://docs.github.com/en/organizations/managing-organization-settings/configuring-the-retention-period-for-github-actions-artifacts-and-logs-in-your-organization) up to a maximum of 400 days.
 
-Importantly, artifacts are stored independently of your application server, ensuring that backups remain safe even if your server fails.
+GitHub stores artifacts independently of your application server. Backups stay safe even if your server fails.
 
-The backup frequency may be altered in the [backup action](../actions/backup/action.yml) file. Here you may also configure additional backup targets, such as cloud storage providers.
+Change the backup frequency in the [backup action](../actions/backup/action.yml) file. You can also configure additional backup targets, such as cloud storage providers.
+
+### Encryption
+
+The install script generates a PGP key pair during setup. It stores the public key at `.box/backup.pub` and commits it to your repository. The script writes the private key to `.box/backup-private.key`. Git ignores this file, so it stays on your local machine.
+
+Keep the private key in a safe place. You need it to decrypt and restore backups. GitHub does not store the private key.
+
+To generate a new key pair, run:
+
+```bash
+curl -fsSL https://the-box.sh/backup_new_key.sh | bash
+```
+
+Use this for key rotation or to set up encryption again. Push the commit to GitHub after the script completes.
 
 ### Restoration
 
-To restore a backup, download the desired artifact from the GitHub Actions workflow run history. The artifact will be a compressed file containing the SQL dump.
+To restore a backup, download the artifact from the GitHub Actions workflow run history. The artifact contains an encrypted SQL dump.
 
-You can restore the database using the built-in database scripts:
+Decryption requires the private key in your GPG keyring. Import the private key on the machine where you restore:
 
 ```bash
-bin/backup_download.sh
-bin/backup_restore.sh
+gpg --import <path-to>/backup-private.key
 ```
 
+Download the latest backup:
+
+```bash
+./bin/backup_download.sh
+```
+
+Restore the database from the downloaded file:
+
+```bash
+./bin/backup_restore.sh [dump_file] [database_name]
+```
+
+The script defaults to `backup.dump.gpg` and the `postgres` database.
+
 > [!NOTE]
-> Backups are stored in PostgreSQL's [custom format](https://www.postgresql.org/docs/current/app-pgdump.html) which is compressed and allows for more flexible restoration options.
+> The Box stores backups in PostgreSQL [custom format](https://www.postgresql.org/docs/current/app-pgdump.html). This format is compressed and permits flexible restoration.
 
 ### Privacy
 
-With backups being stored on GitHub, it's crucial to consider the sensitivity of your data. Ensure that your repository is private to prevent unauthorized access to your backups. Additionally, consider encrypting your database dumps before uploading them as artifacts for an added layer of security.
+The Box encrypts backups before upload, so GitHub never receives unencrypted data. Keep your repository private to add another layer of protection. Store the private key outside the repository and outside GitHub.
 
 > [!IMPORTANT]
-> If you are serving customers in the EU, ensure that you add GitHub as a data processor in your privacy policy to comply with GDPR regulations.
+> If you serve customers in the EU, add GitHub as a data processor in your privacy policy to comply with GDPR.

@@ -1,12 +1,26 @@
 #!/usr/bin/env sh
 
-# Restore the PostgreSQL database from a dump file
-# Usage: ./backup_restore.sh [dump_file] [database_name] [num_jobs]
+# Restore the PostgreSQL database from an encrypted dump file
+# Usage: ./backup_restore.sh [dump_file] [database_name]
+# Requires the backup private key in your GPG keyring.
+# To import a private key: gpg --import <private-key-file>
 
-set -eux
+set -eu
 
-dump_file="${1:-backup.dump}"
+dump_file="${1:-backup.dump.gpg}"
 database_name="${2:-postgres}"
-num_jobs="${3:-$(getconf _NPROCESSORS_ONLN)}"
 
-pg_restore "$dump_file" -d "$database_name" --no-acl --no-owner --no-privileges -j "$num_jobs" --disable-triggers
+if ! command -v gpg >/dev/null 2>&1; then
+    echo "gpg is not installed. Install GnuPG and try again."
+    exit 1
+fi
+
+if ! command -v pg_restore >/dev/null 2>&1; then
+    echo "pg_restore is not installed. Install PostgreSQL client tools and try again."
+    exit 1
+fi
+
+tmpfile=$(mktemp)
+trap 'rm -f "$tmpfile"' EXIT
+gpg --batch --yes --decrypt --output "$tmpfile" "$dump_file"
+pg_restore "$tmpfile" -d "$database_name" --no-acl --no-owner --no-privileges --disable-triggers
