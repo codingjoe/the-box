@@ -51,3 +51,4 @@ fi
 git add .box/backup.pub
 
 echo -e "${success_msg}SUCCESS${fin}"
+echo -e "${error}WARNING:${fin} Save .box/backup-private.key in a safe place."
