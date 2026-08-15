@@ -21,8 +21,6 @@ PostgreSQL is optional. When the postgres service is included in the composition
 psql "postgresql://postgres:${POSTGRES_PASSWORD}@pg.${HOSTNAME}:443/postgres?sslmode=require"
 ```
 
-The proxy accepts both classic `SSLRequest` negotiation and plaintext connections.
-
 Redis is optional. When the redis service is included in the composition, it is exposed through the Caddy reverse proxy on port `443` with TLS termination. Connect from outside the Docker host with:
 
 ```bash
