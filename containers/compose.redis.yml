@@ -1,4 +1,3 @@
-name: the-box-redis
 services:
   redis:
     image: redis:8.6.0-alpine

@@ -1,4 +1,3 @@
-name: the-box
 services:
   web:
     image: traefik/whoami:v1.12.0 # placeholder image for OCI artifact

@@ -1,4 +1,3 @@
-name: the-box
 include:
   - containers/compose.postgres.yml
   - containers/compose.redis.yml

@@ -1,4 +1,3 @@
-name: the-box-postgres
 services:
   postgres:
     image: supabase/postgres:17.5.1.070-orioledb
