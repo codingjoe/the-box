@@ -1,6 +1,6 @@
 services:
   redis:
-    image: redis:8.6.0-alpine
+    image: redis:8.10.0-alpine
     volumes:
       - redis:/data
     networks:
