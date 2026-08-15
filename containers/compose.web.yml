@@ -1,8 +1,22 @@
-version: "3.8"
+name: the-box
 services:
   web:
-    image: traefik/whoami:latest # placeholder image for OCI artifact
-    stop_grace_period: 1m # Allow up to 1 minute for graceful shutdown
+    image: traefik/whoami:v1.12.0 # placeholder image for OCI artifact
+    environment:
+      PORT: ${PORT:-8000}
+      HOSTNAME: ${HOSTNAME:-localhost}
+    networks:
+      - app
+      - app-wan
+      - caddy
+    labels:
+      - "caddy=${HOSTNAME:-localhost}"
+      - "caddy.reverse_proxy={{upstreams ${PORT:-8000}}}"
+      - "caddy.reverse_proxy.lb_policy=round_robin"
+      - "caddy.reverse_proxy.health_uri=/"
+      - "caddy.reverse_proxy.health_headers.X-Forwarded-Host=${HOSTNAME:-localhost}"
+      - "caddy.reverse_proxy.health_headers.X-Forwarded-Proto=https"
+      - "caddy.cache"
     deploy:
       mode: replicated
       replicas: 2
@@ -21,21 +35,7 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-    environment:
-      PORT: ${PORT:-8000}
-      HOSTNAME: ${HOSTNAME:-localhost}
-    networks:
-      - app
-      - app-wan
-      - caddy
-    labels:
-      - "caddy=${HOSTNAME:-localhost}"
-      - "caddy.reverse_proxy={{upstreams ${PORT:-8000}}}"
-      - "caddy.reverse_proxy.lb_policy=round_robin"
-      - "caddy.reverse_proxy.health_uri=/"
-      - "caddy.reverse_proxy.health_headers.X-Forwarded-Host=${HOSTNAME:-localhost}"
-      - "caddy.reverse_proxy.health_headers.X-Forwarded-Proto=https"
-      - "caddy.cache"
+    stop_grace_period: 1m # Allow up to 1 minute for graceful shutdown
 networks:
   app:
     internal: true

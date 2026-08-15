@@ -1,15 +1,21 @@
-version: "3.8"
+name: the-box
 services:
   postgres:
     image: supabase/postgres:17.5.1.070-orioledb
     volumes:
       - postgres:/var/lib/postgresql/data
-    restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - app
       - caddy
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
     labels:
       - "caddy=pg.${HOSTNAME:-localhost}"
       - "caddy.respond=OK"
@@ -20,12 +26,6 @@ services:
       - 'caddy_1.servers.listener_wrappers.0_layer4.route.0_tls.connection_policy.alpn=postgresql'
       - 'caddy_1.servers.listener_wrappers.0_layer4.route.1_proxy={{upstreams 5432}}'
       - 'caddy_1.servers.listener_wrappers.1_tls='
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 10s
   web:
     depends_on:
       - postgres

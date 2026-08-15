@@ -1,13 +1,20 @@
-version: "3.8"
+name: the-box
 services:
   redis:
     image: redis:8.6.0-alpine
     volumes:
       - redis:/data
-    restart: unless-stopped
     networks:
       - app
       - caddy
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--pass", "${REDIS_PASSWORD}", "ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
     labels:
       - "caddy=redis.${HOSTNAME:-localhost}"
       - "caddy.respond=OK"
@@ -17,13 +24,6 @@ services:
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_1.0_tls='
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_1.1_proxy={{upstreams 6379}}'
       - 'caddy_1.servers.listener_wrappers.1_tls='
-    healthcheck:
-      test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD}", "ping"]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 10s
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
   web:
     depends_on:
       - redis

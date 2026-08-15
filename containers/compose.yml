@@ -1,35 +1,32 @@
-version: "3.8"
+name: the-box
 services:
   caddy:
-    container_name: caddy
     image: codingjoe/the-box-caddy:main
-    #    build:
-    #      context: ./caddy
-    #      dockerfile: Dockerfile
-    restart: unless-stopped
-    cap_add:
-      - NET_ADMIN
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+    container_name: caddy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
       - caddy_data:/data
       - caddy_config:/config
+    environment:
+      CADDY_INGRESS_NETWORKS: caddy
+    ports:
+      - '0.0.0.0:80:80'
+      - '0.0.0.0:443:443'
+      - '0.0.0.0:443:443/udp'
     networks:
       - caddy
       - caddy-wan
-    environment:
-      CADDY_INGRESS_NETWORKS: caddy
-    command: ["docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile"]
+    command: [ "docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile" ]
+    restart: unless-stopped
     healthcheck:
       test: caddy validate --config /etc/caddy/Caddyfile
-    deploy:
-      mode: global
     labels:
       - "dev.dozzle.group=the-box"
+    cap_add:
+      - NET_ADMIN
+    deploy:
+      mode: global
 networks:
   caddy:
     name: caddy

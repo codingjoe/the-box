@@ -1,10 +1,13 @@
-version: "3.8"
+name: the-box
 services:
   smtp:
     image: ghcr.io/docker-mailserver/docker-mailserver:15.1.0
     container_name: smtp
-    hostname: smtp
-    domainname: ${HOSTNAME}
+    volumes:
+      - smtp-data:/var/mail
+      - smtp-state:/var/mail-state
+      - smtp-config:/tmp/docker-mailserver
+      - /etc/localtime:/etc/localtime:ro
     environment:
       SMTP_ONLY: 1
       ONE_DIR: 1
@@ -14,38 +17,35 @@ services:
       NETWORK_INTERFACE: eth1
       POSTFIX_INET_PROTOCOLS: ipv4
       LOG_LEVEL: info
-    deploy:
-      mode: global
-    volumes:
-      - smtp-data:/var/mail
-      - smtp-state:/var/mail-state
-      - smtp-config:/tmp/docker-mailserver
-      - /etc/localtime:/etc/localtime:ro
+    networks:
+      app:
+        interface_name: eth1
+      smtp-wan:
+        interface_name: eth0
     restart: always
-    stop_grace_period: 1m
     healthcheck:
       test: "ss --listening --ipv4 --tcp | grep --silent ':smtp' || exit 1"
       timeout: 3s
       interval: 10s
       retries: 5
       start_period: 30s
-    networks:
-      app:
-        interface_name: eth1
-      smtp-wan:
-        interface_name: eth0
     labels:
       - "dev.dozzle.group=the-box"
+    deploy:
+      mode: global
+    domainname: ${HOSTNAME}
+    hostname: smtp
+    stop_grace_period: 1m
   web:
     depends_on:
       smtp:
         condition: service_healthy
     environment:
       EMAIL_URL: smtp://smtp:25/
+networks:
+  smtp-wan:
+    name: smtp-wan
 volumes:
   smtp-config:
   smtp-state:
   smtp-data:
-networks:
-  smtp-wan:
-    name: smtp-wan
