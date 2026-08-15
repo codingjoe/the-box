@@ -2,10 +2,10 @@ version: "3.8"
 services:
   caddy:
     container_name: caddy
-    #    image: codingjoe/the-box-caddy:main
-    build:
-      context: ./caddy
-      dockerfile: Dockerfile
+    image: codingjoe/the-box-caddy:main
+    #    build:
+    #      context: ./caddy
+    #      dockerfile: Dockerfile
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -23,7 +23,6 @@ services:
       - caddy-wan
     environment:
       CADDY_INGRESS_NETWORKS: caddy
-      HOSTNAME: ${HOSTNAME}
     command: ["docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile"]
     healthcheck:
       test: caddy validate --config /etc/caddy/Caddyfile
