@@ -33,4 +33,4 @@ Then restore:
 ./bin/backup_restore.sh [dump_file] [database_name]
 ```
 
-Defaults to `backup.dump.gpg` and the `postgres` database. Requires `gpg` and `pg_restore` installed locally.
+The script defaults to `backup.dump.gpg` and the `postgres` database. The script requires `gpg` and `pg_restore` installed locally.
