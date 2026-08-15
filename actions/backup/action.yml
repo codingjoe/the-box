@@ -53,21 +53,19 @@ runs:
       run: dotenvx run -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ github.event.repository.name }}-${{ github.event.ref || github.ref_name }} exec postgres /usr/bin/pg_dump -Rc -U postgres postgres > backup.dump
       env:
         DOTENV_PRIVATE_KEY: ${{ inputs.dotenv-private-key }}
-    - name: Install age
-      shell: sh
-      run: curl -fsSL https://github.com/FiloSottile/age/releases/download/v1.2.1/age-v1.2.1-linux-amd64.tar.gz | sudo tar xz -C /usr/local/bin --strip-components=1 age/age age/age-keygen
     - name: Encrypt backup
       shell: sh
       env:
         BACKUP_PUBLIC_KEY_PATH: ${{ inputs.backup-public-key-path }}
       run: |
         if [ ! -s "$BACKUP_PUBLIC_KEY_PATH" ]; then
-          echo "Public key file '$BACKUP_PUBLIC_KEY_PATH' is missing or empty. Generate an age key pair and commit the public key to the repository."
+          echo "Public key file '$BACKUP_PUBLIC_KEY_PATH' is missing or empty. Generate a GPG key pair and commit the public key to the repository."
           exit 1
         fi
-        age -r "$(cat "$BACKUP_PUBLIC_KEY_PATH")" -o backup.dump.age backup.dump && rm backup.dump
+        gpg --import "$BACKUP_PUBLIC_KEY_PATH"
+        gpg --batch --yes --trust-model always --encrypt --recipient backup@the-box.local --output backup.dump.gpg backup.dump && rm backup.dump
     - name: Upload Postgres backup artifact
       uses: actions/upload-artifact@v7
       with:
         name: backup.dump
-        path: backup.dump.age
+        path: backup.dump.gpg

@@ -2,21 +2,28 @@
 
 Capture an encrypted backup of the PostgreSQL database and upload it as a GitHub Actions artifact.
 
-Backups are encrypted at rest using [age](https://github.com/FiloSottile/age) asymmetric encryption. The public key lives in the repository at `keys/backup.pub`; the private key stays in GitHub secrets.
+Backups are encrypted using [GnuPG](https://gnupg.org/) asymmetric encryption. GPG uses hybrid encryption: a random symmetric session key encrypts the data (fast AES), and the public key encrypts the session key (RSA). The public key lives in the repository at `keys/backup.pub`; the private key stays with the person who set up The Box — it is never stored on GitHub.
 
 ## Key Generation
 
-Generate an age key pair and configure GitHub:
+The install script (`bin/install.sh`) generates the key pair automatically. To generate one manually:
 
 ```sh
 mkdir -p keys
-age-keygen -o keys/backup.key 2>/dev/null
-awk -F': ' '/public key/{print $2}' keys/backup.key > keys/backup.pub
-gh secret set BACKUP_PRIVATE_KEY < keys/backup.key
-rm -f keys/backup.key
+gpg --batch --full-generate-key <<EOF
+%no-protection
+Key-Type: RSA
+Key-Length: 4096
+Name-Real: The Box Backup
+Name-Email: backup@the-box.local
+Expire-Date: 0
+%commit
+EOF
+gpg --export --armor backup@the-box.local > keys/backup.pub
+gpg --export-secret-keys --armor backup@the-box.local > keys/backup-private.key
 ```
 
-Commit `keys/backup.pub` to the repository. Never commit the private key (`keys/backup.key` is git-ignored).
+Commit `keys/backup.pub` to the repository. Save `keys/backup-private.key` somewhere safe — it is git-ignored and never stored on GitHub. You need it to decrypt and restore backups.
 
 ## Usage
 
@@ -38,7 +45,13 @@ Download the latest encrypted backup and restore it to a local PostgreSQL instan
 
 ```sh
 ./bin/backup_download.sh
-./bin/backup_restore.sh <path-to-private-key> [dump_file] [database_name]
+./bin/backup_restore.sh [dump_file] [database_name]
 ```
 
-You need [age](https://github.com/FiloSottile/age#install) and `pg_restore` installed locally.
+The private key must be in your GPG keyring. To import it on a new machine:
+
+```sh
+gpg --import <path-to>/backup-private.key
+```
+
+You need `gpg` and `pg_restore` installed locally.

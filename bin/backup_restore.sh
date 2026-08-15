@@ -1,21 +1,17 @@
 #!/usr/bin/env sh
 
 # Restore the PostgreSQL database from an encrypted dump file
-# Usage: ./backup_restore.sh <private_key_file> [dump_file] [database_name]
+# Usage: ./backup_restore.sh [dump_file] [database_name]
+# Requires the backup private key in your GPG keyring.
+# To import a private key: gpg --import <private-key-file>
 
 set -eu
 
-if [ "$#" -lt 1 ]; then
-    echo "Usage: $0 <private_key_file> [dump_file] [database_name]"
-    exit 1
-fi
+dump_file="${1:-backup.dump.gpg}"
+database_name="${2:-postgres}"
 
-private_key="$1"
-dump_file="${2:-backup.dump.age}"
-database_name="${3:-postgres}"
-
-if ! command -v age >/dev/null 2>&1; then
-    echo "age is not installed. Install it from https://github.com/FiloSottile/age#install and try again."
+if ! command -v gpg >/dev/null 2>&1; then
+    echo "gpg is not installed. Install GnuPG and try again."
     exit 1
 fi
 
@@ -26,5 +22,5 @@ fi
 
 tmpfile=$(mktemp)
 trap 'rm -f "$tmpfile"' EXIT
-age -d -i "$private_key" "$dump_file" > "$tmpfile"
+gpg --batch --yes --decrypt --output "$tmpfile" "$dump_file"
 pg_restore "$tmpfile" -d "$database_name" --no-acl --no-owner --no-privileges --disable-triggers

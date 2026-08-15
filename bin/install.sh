@@ -39,9 +39,9 @@ if ! command -v dotenvx >/dev/null 2>&1; then
     exit 1
 fi
 
-# Test if age is installed
-if ! command -v age-keygen >/dev/null 2>&1; then
-    echo "age is not installed. Please install it from https://github.com/FiloSottile/age#install and try again."
+# Test if GnuPG is installed
+if ! command -v gpg >/dev/null 2>&1; then
+    echo "GnuPG (gpg) is not installed. Please install it and try again."
     exit 1
 fi
 
@@ -157,14 +157,20 @@ dotenvx get DOTENV_PRIVATE_KEY_PRODUCTION -f .env.keys | gh secret set DOTENV_PR
 
 echo "Generating backup encryption key pair..."
 mkdir -p keys
-age-keygen -o keys/backup.key 2>/dev/null
-awk -F': ' '/public key/{print $2}' keys/backup.key > keys/backup.pub
-if [ ! -s keys/backup.pub ]; then
-    echo "Failed to generate backup encryption key pair."
-    exit 1
-fi
-gh secret set BACKUP_PRIVATE_KEY < keys/backup.key
-rm -f keys/backup.key
+gpg --batch --full-generate-key <<EOF
+%no-protection
+Key-Type: RSA
+Key-Length: 4096
+Name-Real: The Box Backup
+Name-Email: backup@the-box.local
+Expire-Date: 0
+%commit
+EOF
+gpg --export --armor backup@the-box.local > keys/backup.pub
+gpg --export-secret-keys --armor backup@the-box.local > keys/backup-private.key
+echo -e "${success_msg}IMPORTANT:${fin} Save keys/backup-private.key in a safe place."
+echo "You need it to decrypt and restore backups. It is not stored on GitHub."
+echo "To restore on another machine: gpg --import <path-to>/backup-private.key"
 
 echo "Syncing collaborator SSH keys..."
 gh workflow run sync-ssh-keys.yml --ref main
