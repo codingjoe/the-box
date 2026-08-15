@@ -63,7 +63,8 @@ runs:
           exit 1
         fi
         gpg --import "$BACKUP_PUBLIC_KEY_PATH"
-        gpg --batch --yes --trust-model always --encrypt --recipient backup@the-box.local --output backup.dump.gpg backup.dump && rm backup.dump
+        recipient=$(gpg --list-keys --with-colons | awk -F: '/^fpr/{print $10; exit}')
+        gpg --batch --yes --trust-model always --encrypt --recipient "$recipient" --output backup.dump.gpg backup.dump && rm backup.dump
     - name: Upload Postgres backup artifact
       uses: actions/upload-artifact@v7
       with:

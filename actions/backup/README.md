@@ -1,57 +1,36 @@
-# The Box - PostgreSQL Backup Action
+# Backup
 
-Capture an encrypted backup of the PostgreSQL database and upload it as a GitHub Actions artifact.
+The Box creates daily encrypted PostgreSQL backups and stores them as GitHub Actions artifacts.
 
-Backups are encrypted using [GnuPG](https://gnupg.org/) asymmetric encryption. GPG uses hybrid encryption: a random symmetric session key encrypts the data (fast AES), and the public key encrypts the session key (RSA). The public key lives in the repository at `keys/backup.pub`; the private key stays with the person who set up The Box — it is never stored on GitHub.
+## Setting up
 
-## Key Generation
+The install script (`bin/install.sh`) handles key generation during setup. It creates a GPG key pair unique to your repository and exports:
 
-The install script (`bin/install.sh`) generates the key pair automatically. To generate one manually:
+- **`keys/backup.pub`** — the public key, committed to your repository. The backup workflow uses it to encrypt dumps.
+- **`keys/backup-private.key`** — the private key, saved locally. You need it to restore backups. It is git-ignored and never stored on GitHub.
 
-```sh
-mkdir -p keys
-gpg --batch --full-generate-key <<EOF
-%no-protection
-Key-Type: RSA
-Key-Length: 4096
-Name-Real: The Box Backup
-Name-Email: backup@the-box.local
-Expire-Date: 0
-%commit
-EOF
-gpg --export --armor backup@the-box.local > keys/backup.pub
-gpg --export-secret-keys --armor backup@the-box.local > keys/backup-private.key
-```
+Keep `keys/backup-private.key` safe. Without it, backups cannot be restored.
 
-Commit `keys/backup.pub` to the repository. Save `keys/backup-private.key` somewhere safe — it is git-ignored and never stored on GitHub. You need it to decrypt and restore backups.
-
-## Usage
-
-```yaml
-  - uses: codingjoe/the-box/actions/backup@main
-    with:
-      ssh-host: ${{ vars.SSH_HOSTNAME }}
-      ssh-known-hosts: ${{ vars.SSH_KNOWN_HOSTS }}
-      ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      dotenv-private-key: ${{ secrets.DOTENV_PRIVATE_KEY_PRODUCTION }}
-      environment: ${{ github.environment }}
-```
-
-The public key path defaults to `keys/backup.pub`. Override it with the `backup-public-key-path` input.
-
-## Restore
-
-Download the latest encrypted backup and restore it to a local PostgreSQL instance:
+## Downloading a backup
 
 ```sh
 ./bin/backup_download.sh
-./bin/backup_restore.sh [dump_file] [database_name]
 ```
 
-The private key must be in your GPG keyring. To import it on a new machine:
+This downloads the latest successful backup artifact (`backup.dump.gpg`) from GitHub.
+
+## Restoring a backup
+
+The private key must be in your GPG keyring. If you are on a new machine, import it first:
 
 ```sh
 gpg --import <path-to>/backup-private.key
 ```
 
-You need `gpg` and `pg_restore` installed locally.
+Then restore:
+
+```sh
+./bin/backup_restore.sh [dump_file] [database_name]
+```
+
+Defaults to `backup.dump.gpg` and the `postgres` database. Requires `gpg` and `pg_restore` installed locally.

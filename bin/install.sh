@@ -157,17 +157,18 @@ dotenvx get DOTENV_PRIVATE_KEY_PRODUCTION -f .env.keys | gh secret set DOTENV_PR
 
 echo "Generating backup encryption key pair..."
 mkdir -p keys
+gpg_email="backup@${gh_owner}-${project_name}"
 gpg --batch --full-generate-key <<EOF
 %no-protection
 Key-Type: RSA
 Key-Length: 4096
 Name-Real: The Box Backup
-Name-Email: backup@the-box.local
+Name-Email: ${gpg_email}
 Expire-Date: 0
 %commit
 EOF
-gpg --export --armor backup@the-box.local > keys/backup.pub
-gpg --export-secret-keys --armor backup@the-box.local > keys/backup-private.key
+gpg --export --armor "$gpg_email" > keys/backup.pub
+gpg --export-secret-keys --armor "$gpg_email" > keys/backup-private.key
 echo -e "${success_msg}IMPORTANT:${fin} Save keys/backup-private.key in a safe place."
 echo "You need it to decrypt and restore backups. It is not stored on GitHub."
 echo "To restore on another machine: gpg --import <path-to>/backup-private.key"
