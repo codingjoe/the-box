@@ -11,7 +11,7 @@ The Box is an open-source platform-as-a-service (PaaS) solution that enables dev
 - [Easy Deployment](deployment.md): Deploy applications with just a few clicks.
 - [Scalability](scaling.md): Automatically scale applications based on demand.
 - [Monitoring](monitoring.md): Keep track of application performance and health.
-- [Environment Management](enviroment.md): Manage configuration and environment variables effectively.
+- [Environment Management](environment.md): Manage configuration and environment variables effectively.
 - [Backups](backups.md): Schedule and manage database backups with ease.
 - [File Storage](storage.md): Handle file uploads and storage seamlessly.
 
