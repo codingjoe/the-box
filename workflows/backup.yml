@@ -9,9 +9,12 @@ concurrency:
 jobs:
   pg_dump:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: codingjoe/the-box/actions/backup@main
         with:
           ssh-host: ${{ vars.SSH_HOSTNAME }}
           ssh-known-hosts: ${{ vars.SSH_KNOWN_HOSTS }}
-          ssh-private-keys: ${{ secrets.SSH_PRIVATE_KEY }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          dotenv-private-key: ${{ secrets.DOTENV_PRIVATE_KEY_PRODUCTION }}
+          environment: ${{ github.environment }}
