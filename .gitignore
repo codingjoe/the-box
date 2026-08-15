@@ -212,5 +212,8 @@ node_modules/
 # PG backups
 backups/
 
+# Backup encryption private keys
+keys/*.key
+
 # compiled compose artifacts
 compose.*.compiled.yml
