@@ -10,7 +10,7 @@ By default, GitHub retains workflow artifacts for 90 days. You can [adjust the r
 
 GitHub stores artifacts independently of your application server. Backups stay safe even if your server fails.
 
-Change the backup frequency in the [backup action](../actions/backup/action.yml) file. You can also configure additional backup targets, such as cloud storage providers.
+Change the backup frequency in the [backup action](https://github.com/codingjoe/the-box/blob/main/actions/backup/action.yml) file. You can also configure additional backup targets, such as cloud storage providers.
 
 ### Encryption
 
