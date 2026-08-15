@@ -6,7 +6,8 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     xcaddy build \
     --with github.com/lucaslorentz/caddy-docker-proxy/v2 \
-    --with github.com/caddyserver/cache-handler
+    --with github.com/caddyserver/cache-handler \
+    --with github.com/mholt/caddy-l4
 
 
 FROM caddy:2.11.4-alpine

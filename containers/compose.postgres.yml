@@ -9,6 +9,17 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - app
+      - caddy
+    labels:
+      - "caddy=pg.${PG_HOST:-localhost}"
+      - "caddy.respond=OK"
+      - 'caddy_1.servers.listener_wrappers.0_layer4.@tls-pgsql=tls'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.@tls-pgsql.alpn=postgresql'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.@tls-pgsql.sni=pg.${PG_HOST:-localhost}'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.route=@tls-pgsql'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.route.0_tls.connection_policy.alpn=postgresql'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.route.1_proxy={{upstreams 5432}}'
+      - 'caddy_1.servers.listener_wrappers.1_tls='
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 10s
