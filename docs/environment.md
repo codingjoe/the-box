@@ -15,13 +15,19 @@ The default variables are set:
 
 ## External database access
 
-PostgreSQL is optional. When the postgres service is included in the composition, it is exposed on port `5432` through the Caddy reverse proxy, which terminates TLS with a signed certificate. Connect from outside the Docker host with:
+PostgreSQL is optional. When the postgres service is included in the composition, it is exposed through the Caddy reverse proxy on port `443` with TLS termination and a signed certificate. The L4 listener routes PostgreSQL traffic by SNI and ALPN. Connect from outside the Docker host with:
 
 ```bash
-psql "postgresql://postgres:${POSTGRES_PASSWORD}@pg.${HOSTNAME}:5432/postgres?sslmode=require"
+psql "postgresql://postgres:${POSTGRES_PASSWORD}@pg.${HOSTNAME}:443/postgres?sslmode=require"
 ```
 
 The proxy accepts both classic `SSLRequest` negotiation and plaintext connections.
+
+Redis is optional. When the redis service is included in the composition, it is exposed through the Caddy reverse proxy on port `443` with TLS termination. Connect from outside the Docker host with:
+
+```bash
+redis-cli --tls -h redis.${HOSTNAME} -p 443 --sni redis.${HOSTNAME} -a ${REDIS_PASSWORD}
+```
 
 ## Managing variables
 

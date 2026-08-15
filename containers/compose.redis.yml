@@ -7,6 +7,16 @@ services:
     restart: unless-stopped
     networks:
       - app
+      - caddy
+    labels:
+      - "caddy=redis.${HOSTNAME:-localhost}"
+      - "caddy.respond=OK"
+      - 'caddy_1.servers.listener_wrappers.0_layer4.@tls-redis=tls'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.@tls-redis.sni=redis.${HOSTNAME:-localhost}'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.route_1=@tls-redis'
+      - 'caddy_1.servers.listener_wrappers.0_layer4.route_1.0_tls='
+      - 'caddy_1.servers.listener_wrappers.0_layer4.route_1.1_proxy={{upstreams 6379}}'
+      - 'caddy_1.servers.listener_wrappers.1_tls='
     healthcheck:
       test: ["CMD", "redis-cli", "--pass", "${REDIS_PASSWORD}", "ping"]
       interval: 10s

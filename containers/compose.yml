@@ -2,10 +2,10 @@ version: "3.8"
 services:
   caddy:
     container_name: caddy
-    image: codingjoe/the-box-caddy:main
-    #    build:
-    #      context: ./caddy
-    #      dockerfile: Dockerfile
+    #    image: codingjoe/the-box-caddy:main
+    build:
+      context: ./caddy
+      dockerfile: Dockerfile
     restart: unless-stopped
     cap_add:
       - NET_ADMIN
@@ -13,7 +13,6 @@ services:
       - "80:80"
       - "443:443"
       - "443:443/udp"
-      - "5432:5432"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro

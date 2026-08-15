@@ -22,7 +22,7 @@ services:
         max_attempts: 3
         window: 120s
     environment:
-      PORT: ${PORT:-8000}
+      PORT: ${PORT:-80}
       HOSTNAME: ${HOSTNAME:-localhost}
     networks:
       - app
@@ -30,7 +30,7 @@ services:
       - caddy
     labels:
       - "caddy=${HOSTNAME:-localhost}"
-      - "caddy.reverse_proxy={{upstreams ${PORT:-8000}}}"
+      - "caddy.reverse_proxy={{upstreams ${PORT:-80}}}"
       - "caddy.reverse_proxy.lb_policy=round_robin"
       - "caddy.reverse_proxy.health_uri=/"
       - "caddy.reverse_proxy.health_headers.X-Forwarded-Host=${HOSTNAME:-localhost}"
