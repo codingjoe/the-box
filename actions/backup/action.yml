@@ -68,5 +68,5 @@ runs:
     - name: Upload Postgres backup artifact
       uses: actions/upload-artifact@v7
       with:
-        name: backup.dump
+        name: backup.dump.gpg
         path: backup.dump.gpg
