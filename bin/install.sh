@@ -39,6 +39,12 @@ if ! command -v dotenvx >/dev/null 2>&1; then
     exit 1
 fi
 
+# Test if age is installed
+if ! command -v age-keygen >/dev/null 2>&1; then
+    echo "age is not installed. Please install it from https://github.com/FiloSottile/age#install and try again."
+    exit 1
+fi
+
 # org or user
 gh_owner=$(gh repo view --json owner -q '.owner.login')
 
@@ -149,10 +155,21 @@ dotenvx set POSTGRES_PASSWORD "$(python -c "import secrets; print(secrets.token_
 dotenvx set REDIS_PASSWORD "$(python -c "import secrets; print(secrets.token_urlsafe())")" -f .env.production
 dotenvx get DOTENV_PRIVATE_KEY_PRODUCTION -f .env.keys | gh secret set DOTENV_PRIVATE_KEY_PRODUCTION
 
+echo "Generating backup encryption key pair..."
+mkdir -p keys
+age-keygen -o keys/backup.key 2>/dev/null
+awk -F': ' '/public key/{print $2}' keys/backup.key > keys/backup.pub
+if [ ! -s keys/backup.pub ]; then
+    echo "Failed to generate backup encryption key pair."
+    exit 1
+fi
+gh secret set BACKUP_PRIVATE_KEY < keys/backup.key
+rm -f keys/backup.key
+
 echo "Syncing collaborator SSH keys..."
 gh workflow run sync-ssh-keys.yml --ref main
 echo -en "${fin}"
 
-git add .env.production .dtop.yml
+git add .env.production .dtop.yml keys/backup.pub
 
 echo "Setup complete! Your project ${project_name} is being deployed to ${hostname}."

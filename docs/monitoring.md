@@ -16,7 +16,7 @@ To access via shell, use the following commands:
 dtop
 ```
 
-The bootstrap script creates a `.dtop.yml` configuration file for your project with production and development contexts.
+The install script creates a `.dtop.yml` configuration file for your project with production and development contexts.
 
 ## Application Monitoring
 
