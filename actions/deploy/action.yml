@@ -49,7 +49,7 @@ runs:
         curl -fsSL https://dotenvx.sh | sh
         cp .env.${{ inputs.environment }} .env
     - name: Deploy application to the box
-      run: dotenvx run -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ github.event.repository.name }}-${{ github.ref_name }} up --detach --quiet-pull
+      run: dotenvx run -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ github.event.repository.name }}-${{ github.ref_name }} up --detach --pull always --quiet-pull
       shell: sh
       env:
         HOSTNAME: ${{ inputs.hostname }}
