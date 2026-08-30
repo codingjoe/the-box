@@ -1,7 +1,7 @@
 name: Deploy
 on:
   workflow_run:
-    workflows: [ci]
+    workflows: [CI]
     strategy: wait-all
     timeout: 0
     branches: [main]
