@@ -1,6 +1,6 @@
 services:
   smtp:
-    image: ghcr.io/docker-mailserver/docker-mailserver:15.1.0
+    image: ghcr.io/docker-mailserver/docker-mailserver:16.0.0
     container_name: smtp
     volumes:
       - smtp-data:/var/mail
