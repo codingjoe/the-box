@@ -3,7 +3,7 @@
 Deploy an application to a server using Docker Compose over SSH.
 The action pulls the pre-built images that the CI workflow published to the GitHub Container Registry.
 The server never builds images itself, which keeps the load on small servers low.
-Traffic facing services are updated without downtime, all other services are recreated gracefully.
+Traffic facing services roll out without downtime, others are recreated gracefully.
 
 ## Usage
 
@@ -48,37 +48,26 @@ services:
 
 ## Zero-downtime deployments
 
-The deploy action updates the traffic facing services with
-[docker-rollout](https://github.com/wowu/docker-rollout).
-It scales each service to twice its replica count, waits for the new containers to become
-healthy, and only then removes the old containers.
-If the new containers don't become healthy in time, the deployment is rolled back and fails.
+Traffic facing services are updated with [docker-rollout](https://github.com/wowu/docker-rollout).
+It scales each service to twice its replicas, waits for the new containers to become healthy, and removes the old ones only then.
+Unhealthy new containers roll back and fail the deployment.
 
-Apps with a single traffic service need no configuration, the default `web` is rolled out.
-Apps with multiple traffic facing services set the `rollout-services` input:
+Most apps need no configuration: `web` is rolled out by default.
+Apps with multiple traffic facing services set `rollout-services`:
 
 ```yaml
-      - uses: codingjoe/the-box/actions/deploy@main
-        with:
-          ...
-          rollout-services: web mta msa # rolled out one after another, without downtime
+  - uses: codingjoe/the-box/actions/deploy@main
+    with:
+      rollout-services: web mta msa
 ```
 
-All services not listed are recreated the classic way.
-Docker Compose stops the old containers gracefully, honoring `stop_grace_period`, and starts
-new ones. That is the right behavior for workers, that drain and exit on `SIGTERM`.
-One-shot services, like database migrations, also run in this phase, before the rollout
-starts new replicas. To run before the new containers, make them a
-`service_completed_successfully` dependency of the rollout services, as in the
-[relay](https://github.com/codingjoe/relay) example.
+All other services are recreated gracefully: Docker Compose stops them, honoring `stop_grace_period`, then starts new ones.
+Workers drain on `SIGTERM`, one-shot jobs like migrations run before the rollout starts.
+Gate rollout services on them with a `service_completed_successfully` dependency, as in the [relay](https://github.com/codingjoe/relay) example.
 
-Rollout services have two requirements:
+Rollout services must not publish host ports or define a `container_name`, since old and new containers run in parallel.
+Route TCP through the Caddy proxy instead, like [relay](https://github.com/codingjoe/relay) does for SMTP with layer 4 labels.
 
-- They must not publish host ports or define a `container_name`.
-  docker-rollout runs old and new containers in parallel, so ports and names must be free.
-  Route traffic through the Caddy proxy instead, like the
-  [relay](https://github.com/codingjoe/relay) does with layer 4 proxies for SMTP.
-- They should define a healthcheck. With a healthcheck, the deployment waits until the new
-  containers are actually healthy and rolls back otherwise. Without a healthcheck, it
-  waits a fixed 10 seconds. Set `rollout-timeout` to more than the healthcheck's
-  `start_period` plus `interval` times `retries`, the default of 120 seconds fits most apps.
+Give rollout services a healthcheck.
+Without one, the deployment waits a fixed 10 seconds.
+Set `rollout-timeout` above the healthcheck's `start_period` plus `interval` times `retries`, the default of 120 seconds fits most apps.

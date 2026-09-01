@@ -64,44 +64,37 @@ The deployment workflow performs the following steps:
 1. **Trigger**: The workflow is triggered by a push to the `main` branch (after the `ci` workflow succeeds) or can be triggered manually.
 1. **Environment Setup**: It sets up an SSH connection to your production server using the configured secrets.
 1. **Remote Deployment**: It establishes a remote Docker context to your server.
-1. **Application Start**: It pulls the published images and starts the application containers. Traffic facing services are rolled out without downtime, all other services are recreated gracefully. Your server never builds images itself, which keeps the load on your server low.
+1. **Application Start**: It pulls the published images and starts the application containers. Traffic facing services roll out without downtime. Your server never builds images itself, which keeps the load on your server low.
 
 Your application will be served via a Caddy reverse proxy, which also handles automatic SSL certificate provisioning.
 
 ### Zero-downtime deployments
 
-The deploy action updates traffic facing services without downtime, using [docker-rollout](https://github.com/wowu/docker-rollout).
-It scales each service to twice its replica count, waits for the new containers to become healthy, and removes the old containers only then.
-If the new containers don't become healthy in time, the deployment is rolled back and fails.
-The Caddy proxy picks up the new containers automatically and stops routing to the old ones, so users never see an error.
+The deploy action updates traffic facing services with [docker-rollout](https://github.com/wowu/docker-rollout).
+It scales each service to twice its replicas, waits for the new containers to become healthy, and removes the old ones only then.
+Failed healthchecks roll the deployment back.
+The Caddy proxy picks up new containers automatically, so users never see an error.
 
-Apps with a single traffic service need no configuration.
-The deploy action rolls out the `web` service by default.
+Most apps need no configuration: the `web` service is rolled out by default.
 Apps with multiple traffic facing services, like [relay](https://github.com/codingjoe/relay), list them in the `rollout-services` input:
 
 ```yaml
   - uses: codingjoe/the-box/actions/deploy@main
     with:
-      rollout-services: web mta msa     # rolled out one after another
+      rollout-services: web mta msa
 ```
 
-All other services are recreated the classic way.
-Docker Compose stops the old containers, honoring `stop_grace_period`, and starts new ones.
-This drains workers gracefully, while they finish their current job.
-One-shot services, like database migrations, also run in this phase, before the rollout starts.
-To make sure a one-shot service runs before the new replicas start, make it a `service_completed_successfully` dependency of the rollout service, as in the [relay](https://github.com/codingjoe/relay) example.
+All other services are recreated gracefully, so workers drain within `stop_grace_period`.
+One-shot services, like database migrations, run before the rollout starts new replicas.
+Make them a `service_completed_successfully` dependency of the rollout service, as in the [relay](https://github.com/codingjoe/relay) example.
 
-Rollout services must not publish host ports or define a `container_name`.
-docker-rollout runs old and new containers in parallel, so ports and names must be free.
+Rollout services must not publish host ports or define a `container_name`, since old and new containers run in parallel.
 Route TCP traffic through the Caddy proxy instead.
-[relay](https://github.com/codingjoe/relay) does this for SMTP, using layer 4 proxy labels.
+[relay](https://github.com/codingjoe/relay) does this for SMTP, using layer 4 labels.
 
-Rollout services should define a healthcheck.
-With a healthcheck, the deployment waits until the new containers are actually healthy and rolls back otherwise.
-Without a healthcheck, it waits a fixed 10 seconds.
-Set `rollout-timeout` to more than the healthcheck's `start_period` plus `interval` times `retries`.
-The default of 120 seconds fits most apps.
+Give rollout services a healthcheck, so the deployment waits until they are actually healthy.
+Without one, it waits a fixed 10 seconds.
+Set `rollout-timeout` above the healthcheck's `start_period` plus `interval` times `retries`.
 
-To not drop requests that a stopping container is still processing, you can drain the old containers, using the `docker-rollout.pre-stop-hook` label.
-The hook must fail the container's healthcheck, so the proxy stops routing to it, before it is stopped.
-See the [docker-rollout docs](https://docker-rollout.wowu.dev/container-draining) for details.
+To drain old containers instead of dropping in-flight requests, use the `docker-rollout.pre-stop-hook` label.
+See the [docker-rollout docs](https://docker-rollout.wowu.dev/container-draining).

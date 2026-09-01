@@ -1,5 +1,5 @@
 name: Deploy
-description: 'Deploy the application to the production server over SSH using Docker Compose. Pulls the pre-built images published by the CI workflow. Traffic facing services are rolled out without downtime, others are recreated gracefully. Services are never built on the server, which keeps the load on small servers low.'
+description: 'Deploy the application to the production server over SSH using Docker Compose. Pulls the pre-built CI images and rolls out traffic facing services without downtime. Never builds on the server, keeping the load on small servers low.'
 branding:
   icon: 'anchor'
   color: 'blue'
@@ -11,23 +11,23 @@ inputs:
     description: 'The SSH known hosts entry for the production server (e.g., "github.com ssh-rsa ...").'
     required: true
   ssh-private-key:
-    description: 'The SSH private key to use for connecting to the production server. This should be stored as a secret in the repository.'
+    description: 'The SSH private key to connect to the production server. Store it as a repository secret.'
     required: true
   dotenv-private-key:
-    description: 'The private key to use for decrypting secrets in the .env file on the production server. This should be stored as a secret in the repository.'
+    description: 'The private key to decrypt the .env secrets on the production server. Store it as a repository secret.'
     required: true
   environment:
-    description: 'The target environment for deployment (e.g., "production"). This will be used to determine which .env file to use and can also be used for environment-specific configurations.'
+    description: 'The target environment (e.g., "production"). Selects the .env file to use.'
     required: true
   hostname:
-    description: 'The domain to use for the application deployment (e.g., "example.com").'
+    description: 'The application domain (e.g., "example.com").'
     required: true
   rollout-services:
-    description: 'Space-separated services to update without downtime. They must not publish host ports or define a container name. All other services are recreated gracefully. Set to an empty string for apps without a web service.'
+    description: 'Services to roll out without downtime, separated by spaces. Must not publish host ports or define a container_name. All other services are recreated gracefully. Empty for apps without a web service.'
     required: false
     default: 'web'
   rollout-timeout:
-    description: 'Seconds to wait for new rollout containers to become healthy before rolling back. Must exceed the healthcheck start_period plus interval times retries.'
+    description: 'Seconds to wait for new containers to become healthy, before rolling back. Must exceed the healthcheck start_period plus interval times retries.'
     required: false
     default: '120'
 runs:

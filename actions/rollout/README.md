@@ -1,7 +1,6 @@
 # Docker Rollout
 
-Install the [docker-rollout](https://github.com/wowu/docker-rollout) Docker CLI plugin
-for zero downtime deployments with Docker Compose.
+Install the [docker-rollout](https://github.com/wowu/docker-rollout) Docker CLI plugin for zero downtime deployments.
 
 ## Usage
 
