@@ -1,5 +1,13 @@
 {
-  cache
+  cache {
+    redis {
+      configuration {
+        InitAddress {$REDIS_CACHE_ADDR}
+        Password {$REDIS_CACHE_PASSWORD}
+        ClientName souin-redis
+      }
+    }
+  }
   log {
     output stdout
     format json

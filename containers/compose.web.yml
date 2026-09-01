@@ -10,6 +10,7 @@ services:
       - caddy
     labels:
       - "caddy=${HOSTNAME:-localhost}"
+      - "caddy.encode=zstd br gzip"
       - "caddy.reverse_proxy={{upstreams ${PORT:-8000}}}"
       - "caddy.reverse_proxy.lb_policy=round_robin"
       - "caddy.reverse_proxy.health_uri=/"

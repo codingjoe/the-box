@@ -9,6 +9,8 @@ services:
       - caddy_config:/config
     environment:
       CADDY_INGRESS_NETWORKS: caddy
+      REDIS_CACHE_ADDR: redis:6379
+      REDIS_CACHE_PASSWORD: ${REDIS_PASSWORD:-}
     ports:
       - '0.0.0.0:80:80'
       - '0.0.0.0:443:443'
