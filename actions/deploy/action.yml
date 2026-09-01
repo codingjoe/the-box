@@ -1,5 +1,5 @@
 name: Deploy
-description: 'Deploy the application to the production server using Docker Compose. This action connects to the production server via SSH, sets up a Docker context, and deploys the application by pulling the pre-built images published by the CI workflow. Services are never built on the server, which keeps the load on small servers low.'
+description: 'Deploy the application to the production server using Docker Compose. This action connects to the production server via SSH, sets up a Docker context, and deploys the application by pulling the pre-built images published by the CI workflow. Traffic facing services are rolled out without downtime, all other services are recreated gracefully. Services are never built on the server, which keeps the load on small servers low.'
 branding:
   icon: 'anchor'
   color: 'blue'
@@ -22,6 +22,14 @@ inputs:
   hostname:
     description: 'The domain to use for the application deployment (e.g., "example.com").'
     required: true
+  rollout-services:
+    description: 'Space-separated list of traffic facing services to update without downtime, using docker-rollout. Rollout services must not publish host ports or define a container name. All other services are recreated gracefully. Set to an empty string for apps without traffic facing services.'
+    required: false
+    default: 'web'
+  rollout-timeout:
+    description: 'Seconds to wait for new rollout containers to become healthy before the deployment is rolled back. Must exceed the healthcheck start_period plus interval times retries of all rollout services.'
+    required: false
+    default: '120'
 runs:
   using: "composite"
   steps:
@@ -43,15 +51,20 @@ runs:
         docker context use the-box
       shell: sh
     - uses: codingjoe/the-box/actions/compose@main
+    - uses: codingjoe/the-box/actions/rollout@main
     - name: Install dotenvx
       shell: sh
       run: |
         curl -fsSL https://dotenvx.sh | sh
         cp .env.${{ inputs.environment }} .env
     - name: Deploy application to the box
-      run: dotenvx run -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ github.event.repository.name }}-${{ github.ref_name }} up --detach --pull always --quiet-pull
+      run: dotenvx run -- sh ${{ github.action_path }}/deploy.sh
       shell: sh
       env:
+        COMPOSE_FILE: compose.${{ inputs.environment }}.yml
+        PROJECT_NAME: ${{ github.event.repository.name }}-${{ github.ref_name }}
+        ROLLOUT_SERVICES: ${{ inputs.rollout-services }}
+        ROLLOUT_TIMEOUT: ${{ inputs.rollout-timeout }}
         HOSTNAME: ${{ inputs.hostname }}
         DOTENV_PRIVATE_KEY: ${{ inputs.dotenv-private-key }}
         IMAGE_TAG: sha-${{ github.event.workflow_run.head_sha || github.sha }}

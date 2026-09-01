@@ -3,6 +3,7 @@
 Deploy an application to a server using Docker Compose over SSH.
 The action pulls the pre-built images that the CI workflow published to the GitHub Container Registry.
 The server never builds images itself, which keeps the load on small servers low.
+Traffic facing services are updated without downtime, all other services are recreated gracefully.
 
 ## Usage
 
@@ -44,3 +45,40 @@ services:
 - Images on the GitHub Container Registry are private by default.
   Make your image public in the package settings, so that your server can pull it without authentication.
   Alternatively, log in to ghcr.io on your server to pull private images.
+
+## Zero-downtime deployments
+
+The deploy action updates the traffic facing services with
+[docker-rollout](https://github.com/wowu/docker-rollout).
+It scales each service to twice its replica count, waits for the new containers to become
+healthy, and only then removes the old containers.
+If the new containers don't become healthy in time, the deployment is rolled back and fails.
+
+Apps with a single traffic service need no configuration, the default `web` is rolled out.
+Apps with multiple traffic facing services set the `rollout-services` input:
+
+```yaml
+      - uses: codingjoe/the-box/actions/deploy@main
+        with:
+          ...
+          rollout-services: web mta msa # rolled out one after another, without downtime
+```
+
+All services not listed are recreated the classic way.
+Docker Compose stops the old containers gracefully, honoring `stop_grace_period`, and starts
+new ones. That is the right behavior for workers, that drain and exit on `SIGTERM`.
+One-shot services, like database migrations, also run in this phase, before the rollout
+starts new replicas. To run before the new containers, make them a
+`service_completed_successfully` dependency of the rollout services, as in the
+[relay](https://github.com/codingjoe/relay) example.
+
+Rollout services have two requirements:
+
+- They must not publish host ports or define a `container_name`.
+  docker-rollout runs old and new containers in parallel, so ports and names must be free.
+  Route traffic through the Caddy proxy instead, like the
+  [relay](https://github.com/codingjoe/relay) does with layer 4 proxies for SMTP.
+- They should define a healthcheck. With a healthcheck, the deployment waits until the new
+  containers are actually healthy and rolls back otherwise. Without a healthcheck, it
+  waits a fixed 10 seconds. Set `rollout-timeout` to more than the healthcheck's
+  `start_period` plus `interval` times `retries`, the default of 120 seconds fits most apps.
