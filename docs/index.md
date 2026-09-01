@@ -8,7 +8,7 @@ The Box is an open-source platform-as-a-service (PaaS) solution that enables dev
 
 ## Features
 
-- [Easy Deployment](deployment.md): Zero-downtime deployments with just a few clicks.
+- [Easy Deployment](deployment.md): Zero-downtime deployments with a few clicks.
 - [Scalability](scaling.md): Automatically scale applications based on demand.
 - [Monitoring](monitoring.md): Keep track of application performance and health.
 - [Environment Management](environment.md): Manage configuration and environment variables effectively.

@@ -3,7 +3,7 @@
 Deploy an application to a server using Docker Compose over SSH.
 The action pulls the pre-built images that the CI workflow published to the GitHub Container Registry.
 The server never builds images itself, which keeps the load on small servers low.
-Traffic facing services roll out without downtime, others are recreated gracefully.
+The deploy action updates traffic facing services without downtime. It recreates all other services.
 
 ## Usage
 
@@ -48,11 +48,14 @@ services:
 
 ## Zero-downtime deployments
 
-Traffic facing services are updated with [docker-rollout](https://github.com/wowu/docker-rollout).
-It scales each service to twice its replicas, waits for the new containers to become healthy, and removes the old ones only then.
-Unhealthy new containers roll back and fail the deployment.
+The deploy action updates traffic facing services with [docker-rollout](https://github.com/wowu/docker-rollout).
+It scales each service to twice its replicas.
+Then it waits for the new containers to become healthy.
+After that, it removes the old containers.
+If a healthcheck fails, docker-rollout stops the new containers and the deployment fails.
 
-Most apps need no configuration: `web` is rolled out by default.
+Most apps need no configuration.
+The deploy action uses `web` as the default rollout service.
 Apps with multiple traffic facing services set `rollout-services`:
 
 ```yaml
@@ -61,13 +64,17 @@ Apps with multiple traffic facing services set `rollout-services`:
       rollout-services: web mta msa
 ```
 
-All other services are recreated gracefully: Docker Compose stops them, honoring `stop_grace_period`, then starts new ones.
-Workers drain on `SIGTERM`, one-shot jobs like migrations run before the rollout starts.
-Gate rollout services on them with a `service_completed_successfully` dependency, as in the [relay](https://github.com/codingjoe/relay) example.
+The deploy action recreates all other services.
+Docker Compose honors `stop_grace_period` when it stops a service, so workers can drain.
+One-shot services, like database migrations, run before the rollout starts new replicas.
+The rollout service must depend on the one-shot service with `service_completed_successfully`, as in the [relay](https://github.com/codingjoe/relay) example.
 
-Rollout services must not publish host ports or define a `container_name`, since old and new containers run in parallel.
-Route TCP through the Caddy proxy instead, like [relay](https://github.com/codingjoe/relay) does for SMTP with layer 4 labels.
+Rollout services must not publish host ports or define a `container_name`, because old and new containers run in parallel.
+TCP traffic must use the Caddy proxy.
+[relay](https://github.com/codingjoe/relay) uses layer 4 labels for SMTP.
 
-Give rollout services a healthcheck.
-Without one, the deployment waits a fixed 10 seconds.
-Set `rollout-timeout` above the healthcheck's `start_period` plus `interval` times `retries`, the default of 120 seconds fits most apps.
+Rollout services must define a healthcheck.
+Then the deployment waits until the new containers are healthy.
+Without a healthcheck, the deployment waits a fixed 10 seconds.
+The `rollout-timeout` value must be more than the healthcheck `start_period` plus `interval` times `retries`.
+The default of 120 seconds fits most apps.

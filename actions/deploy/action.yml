@@ -1,5 +1,5 @@
 name: Deploy
-description: 'Deploy the application to the production server over SSH using Docker Compose. Pulls the pre-built CI images and rolls out traffic facing services without downtime. Never builds on the server, keeping the load on small servers low.'
+description: 'Deploy the application to the production server over SSH using Docker Compose. Pulls the pre-built CI images. Updates traffic facing services without downtime. Never builds on the server. This keeps the load on small servers low.'
 branding:
   icon: 'anchor'
   color: 'blue'
@@ -17,17 +17,17 @@ inputs:
     description: 'The private key to decrypt the .env secrets on the production server. Store it as a repository secret.'
     required: true
   environment:
-    description: 'The target environment (e.g., "production"). Selects the .env file to use.'
+    description: 'The target environment (for example, "production"). Selects the .env file to use.'
     required: true
   hostname:
-    description: 'The application domain (e.g., "example.com").'
+    description: 'The application domain (for example, "example.com").'
     required: true
   rollout-services:
-    description: 'Services to roll out without downtime, separated by spaces. Must not publish host ports or define a container_name. All other services are recreated gracefully. Empty for apps without a web service.'
+    description: 'Services to update without downtime, separated by spaces. Must not publish host ports or define a container_name. The deploy action recreates all other services. Set an empty value for apps without a web service.'
     required: false
     default: 'web'
   rollout-timeout:
-    description: 'Seconds to wait for new containers to become healthy, before rolling back. Must exceed the healthcheck start_period plus interval times retries.'
+    description: 'Seconds to wait for new containers to become healthy before rollback. Must be more than the healthcheck start_period plus interval times retries.'
     required: false
     default: '120'
 runs:
