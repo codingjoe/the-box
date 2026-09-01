@@ -15,7 +15,7 @@
 Production ready services fully managed on a RaspberryPi (or any other machine):
 
 - 🏗️ [12-factor] app principles
-- 🚀 continues deployment
+- 🚀 zero-downtime continuous deployment
 - 🔐 environment & key management
 - 🗄️ managed databases ([PostgreSQL], [Redis])
 - 🔔 managed [updates & security alerts][dependabot]

@@ -3,6 +3,7 @@
 Deploy an application to a server using Docker Compose over SSH.
 The action pulls the pre-built images that the CI workflow published to the GitHub Container Registry.
 The server never builds images itself, which keeps the load on small servers low.
+The deploy action updates traffic facing services without downtime. It recreates all other services.
 
 ## Usage
 
@@ -44,3 +45,36 @@ services:
 - Images on the GitHub Container Registry are private by default.
   Make your image public in the package settings, so that your server can pull it without authentication.
   Alternatively, log in to ghcr.io on your server to pull private images.
+
+## Zero-downtime deployments
+
+The deploy action updates traffic facing services with [docker-rollout](https://github.com/wowu/docker-rollout).
+It scales each service to twice its replicas.
+Then it waits for the new containers to become healthy.
+After that, it removes the old containers.
+If a healthcheck fails, docker-rollout stops the new containers and the deployment fails.
+
+Most apps need no configuration.
+The deploy action uses `web` as the default rollout service.
+Apps with multiple traffic facing services set `rollout-services`:
+
+```yaml
+  - uses: codingjoe/the-box/actions/deploy@main
+    with:
+      rollout-services: web mta msa
+```
+
+The deploy action recreates all other services.
+Docker Compose honors `stop_grace_period` when it stops a service, so workers can drain.
+One-shot services, like database migrations, run before the rollout starts new replicas.
+The rollout service must depend on the one-shot service with `service_completed_successfully`, as in the [relay](https://github.com/codingjoe/relay) example.
+
+Rollout services must not publish host ports or define a `container_name`, because old and new containers run in parallel.
+TCP traffic must use the Caddy proxy.
+[relay](https://github.com/codingjoe/relay) uses layer 4 labels for SMTP.
+
+Rollout services must define a healthcheck.
+Then the deployment waits until the new containers are healthy.
+Without a healthcheck, the deployment waits a fixed 10 seconds.
+The `rollout-timeout` value must be more than the healthcheck `start_period` plus `interval` times `retries`.
+The default of 120 seconds fits most apps.

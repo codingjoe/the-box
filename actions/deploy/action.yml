@@ -1,5 +1,5 @@
 name: Deploy
-description: 'Deploy the application to the production server using Docker Compose. This action connects to the production server via SSH, sets up a Docker context, and deploys the application by pulling the pre-built images published by the CI workflow. Services are never built on the server, which keeps the load on small servers low.'
+description: 'Deploy the application to the production server over SSH using Docker Compose. Pulls the pre-built CI images. Updates traffic facing services without downtime. Never builds on the server. This keeps the load on small servers low.'
 branding:
   icon: 'anchor'
   color: 'blue'
@@ -11,17 +11,25 @@ inputs:
     description: 'The SSH known hosts entry for the production server (e.g., "github.com ssh-rsa ...").'
     required: true
   ssh-private-key:
-    description: 'The SSH private key to use for connecting to the production server. This should be stored as a secret in the repository.'
+    description: 'The SSH private key to connect to the production server. Store it as a repository secret.'
     required: true
   dotenv-private-key:
-    description: 'The private key to use for decrypting secrets in the .env file on the production server. This should be stored as a secret in the repository.'
+    description: 'The private key to decrypt the .env secrets on the production server. Store it as a repository secret.'
     required: true
   environment:
-    description: 'The target environment for deployment (e.g., "production"). This will be used to determine which .env file to use and can also be used for environment-specific configurations.'
+    description: 'The target environment (for example, "production"). Selects the .env file to use.'
     required: true
   hostname:
-    description: 'The domain to use for the application deployment (e.g., "example.com").'
+    description: 'The application domain (for example, "example.com").'
     required: true
+  rollout-services:
+    description: 'Services to update without downtime, separated by spaces. Must not publish host ports or define a container_name. The deploy action recreates all other services. Set an empty value for apps without a web service.'
+    required: false
+    default: 'web'
+  rollout-timeout:
+    description: 'Seconds to wait for new containers to become healthy before rollback. Must be more than the healthcheck start_period plus interval times retries.'
+    required: false
+    default: '120'
 runs:
   using: "composite"
   steps:
@@ -43,15 +51,20 @@ runs:
         docker context use the-box
       shell: sh
     - uses: codingjoe/the-box/actions/compose@main
+    - uses: codingjoe/the-box/actions/rollout@main
     - name: Install dotenvx
       shell: sh
       run: |
         curl -fsSL https://dotenvx.sh | sh
         cp .env.${{ inputs.environment }} .env
     - name: Deploy application to the box
-      run: dotenvx run -- docker compose --file compose.${{ inputs.environment }}.yml --project-name ${{ github.event.repository.name }}-${{ github.ref_name }} up --detach --pull always --quiet-pull
+      run: dotenvx run -- sh ${{ github.action_path }}/deploy.sh
       shell: sh
       env:
+        COMPOSE_FILE: compose.${{ inputs.environment }}.yml
+        PROJECT_NAME: ${{ github.event.repository.name }}-${{ github.ref_name }}
+        ROLLOUT_SERVICES: ${{ inputs.rollout-services }}
+        ROLLOUT_TIMEOUT: ${{ inputs.rollout-timeout }}
         HOSTNAME: ${{ inputs.hostname }}
         DOTENV_PRIVATE_KEY: ${{ inputs.dotenv-private-key }}
         IMAGE_TAG: sha-${{ github.event.workflow_run.head_sha || github.sha }}

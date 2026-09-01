@@ -64,6 +64,44 @@ The deployment workflow performs the following steps:
 1. **Trigger**: The workflow is triggered by a push to the `main` branch (after the `ci` workflow succeeds) or can be triggered manually.
 1. **Environment Setup**: It sets up an SSH connection to your production server using the configured secrets.
 1. **Remote Deployment**: It establishes a remote Docker context to your server.
-1. **Application Start**: It uses `docker compose` to pull the published images and start the application containers. Your server never builds images itself, which keeps the load on your server low.
+1. **Application Start**: It pulls the published images and starts the application containers. The deployment updates traffic facing services without downtime. Your server never builds images itself, which keeps the load on your server low.
 
 Your application will be served via a Caddy reverse proxy, which also handles automatic SSL certificate provisioning.
+
+### Zero-downtime deployments
+
+The deploy action updates traffic facing services with [docker-rollout](https://github.com/wowu/docker-rollout).
+It scales each service to twice its replicas.
+Then it waits for the new containers to become healthy.
+After that, it removes the old containers.
+If a healthcheck fails, docker-rollout stops the new containers and the deployment fails.
+The Caddy proxy finds new containers automatically.
+As a result, users do not see errors.
+
+Most apps need no configuration.
+The deploy action uses `web` as the default rollout service.
+Apps with multiple traffic facing services, like [relay](https://github.com/codingjoe/relay), list them in the `rollout-services` input:
+
+```yaml
+  - uses: codingjoe/the-box/actions/deploy@main
+    with:
+      rollout-services: web mta msa
+```
+
+The deploy action recreates all other services.
+Docker Compose honors `stop_grace_period` when it stops a service, so workers can drain.
+One-shot services, like database migrations, run before the rollout starts new replicas.
+The rollout service must depend on the one-shot service with `service_completed_successfully`, as in the [relay](https://github.com/codingjoe/relay) example.
+
+Rollout services must not publish host ports or define a `container_name`, because old and new containers run in parallel.
+TCP traffic must use the Caddy proxy.
+[relay](https://github.com/codingjoe/relay) uses layer 4 labels for SMTP.
+
+Rollout services must define a healthcheck.
+Then the deployment waits until the new containers are healthy.
+Without a healthcheck, the deployment waits a fixed 10 seconds.
+The `rollout-timeout` value must be more than the healthcheck `start_period` plus `interval` times `retries`.
+
+The `docker-rollout.pre-stop-hook` label drains old containers before they stop.
+Then in-flight requests do not fail.
+The [docker-rollout docs](https://docker-rollout.wowu.dev/container-draining) give more information.
