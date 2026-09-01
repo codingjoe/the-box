@@ -1,5 +1,5 @@
 name: Deploy
-description: 'Deploy the application to the production server using Docker Compose. This action connects to the production server via SSH, sets up a Docker context, and deploys the application by pulling the pre-built images published by the CI workflow. Traffic facing services are rolled out without downtime, all other services are recreated gracefully. Services are never built on the server, which keeps the load on small servers low.'
+description: 'Deploy the application to the production server over SSH using Docker Compose. Pulls the pre-built images published by the CI workflow. Traffic facing services are rolled out without downtime, others are recreated gracefully. Services are never built on the server, which keeps the load on small servers low.'
 branding:
   icon: 'anchor'
   color: 'blue'
@@ -23,11 +23,11 @@ inputs:
     description: 'The domain to use for the application deployment (e.g., "example.com").'
     required: true
   rollout-services:
-    description: 'Space-separated list of traffic facing services to update without downtime, using docker-rollout. Rollout services must not publish host ports or define a container name. All other services are recreated gracefully. Set to an empty string for apps without traffic facing services.'
+    description: 'Space-separated services to update without downtime. They must not publish host ports or define a container name. All other services are recreated gracefully. Set to an empty string for apps without a web service.'
     required: false
     default: 'web'
   rollout-timeout:
-    description: 'Seconds to wait for new rollout containers to become healthy before the deployment is rolled back. Must exceed the healthcheck start_period plus interval times retries of all rollout services.'
+    description: 'Seconds to wait for new rollout containers to become healthy before rolling back. Must exceed the healthcheck start_period plus interval times retries.'
     required: false
     default: '120'
 runs:
