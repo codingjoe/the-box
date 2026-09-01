@@ -1,11 +1,7 @@
 {
   cache {
     redis {
-      configuration {
-        InitAddress {$REDIS_CACHE_ADDR}
-        Password {$REDIS_CACHE_PASSWORD}
-        ClientName souin-redis
-      }
+      url caddy-redis:6379
     }
   }
   log {
