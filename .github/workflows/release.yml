@@ -108,8 +108,8 @@ jobs:
           image="ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.container }}"
           args=()
           while IFS= read -r tag; do
-            args+=(-t "${tag}")
-          done < <(jq --raw-output '.tags[]' <<< "${DOCKER_METADATA_OUTPUT_TAGS}")
+            [ -n "${tag}" ] && args+=(-t "${tag}")
+          done <<< "${DOCKER_METADATA_OUTPUT_TAGS}"
           args+=(-t "${image}:latest")
           for digest in *; do
             args+=("${image}@sha256:${digest}")
