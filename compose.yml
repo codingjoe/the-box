@@ -8,4 +8,6 @@ services:
     build:
       context: ./containers/caddy
       dockerfile: Dockerfile
+    networks:
+      - ingress
     pull_policy: build

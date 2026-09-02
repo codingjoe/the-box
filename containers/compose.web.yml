@@ -8,7 +8,7 @@ services:
     networks:
       - app
       - app-wan
-      - caddy
+      - ingress
     labels:
       - "caddy=${HOSTNAME:-localhost}"
       - "caddy.encode=zstd br gzip"
@@ -35,5 +35,7 @@ networks:
   app:
     internal: true
   app-wan:
-  caddy:
-    external: true
+  ingress:
+    internal: true
+    labels:
+      - "the-box.ingress=true"

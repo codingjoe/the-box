@@ -40,3 +40,10 @@ for service in $ROLLOUT_SERVICES; do
     rollout "$service"
     echo "::endgroup::"
 done
+
+# Connect caddy to this project's ingress network so it can reach the app
+# without sharing a network with any other app on the box.
+echo "::group::Connecting caddy to ingress network"
+docker network connect "${PROJECT_NAME}_ingress" caddy 2>/dev/null ||
+echo "Caddy is already connected to ${PROJECT_NAME}_ingress"
+echo "::endgroup::"

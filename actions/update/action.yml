@@ -36,3 +36,10 @@ runs:
     - name: Deploy application to the box
       run: docker compose -f ${{ github.action_path }}/compose.yml --project-name the-box up --detach --pull always --quiet-pull
       shell: sh
+    - name: Connect caddy to app ingress networks
+      run: |
+        for network in $(docker network ls --filter label=the-box.ingress=true --format '{{.Name}}'); do
+          docker network connect "$network" caddy 2>/dev/null ||
+            echo "Caddy is already connected to $network"
+        done
+      shell: sh
