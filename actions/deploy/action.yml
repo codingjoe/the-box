@@ -23,7 +23,7 @@ inputs:
     description: 'The application domain (for example, "example.com").'
     required: true
   rollout-services:
-    description: 'Services to update without downtime, separated by spaces. Must not publish host ports or define a container_name. The deploy action recreates all other services. Set an empty value for apps without a web service.'
+    description: 'Services to update without downtime, separated by spaces. Must not publish host ports or define a container_name. The deploy action recreates all other services that changed. Set an empty value for apps without a web service.'
     required: false
     default: 'web'
   rollout-timeout:
