@@ -17,6 +17,7 @@ rollout() {
 # Bring up all services that don't take part in the zero downtime rollout.
 # One-shot services, like database migrations, run here before the rollout
 # scales up new replicas of the traffic facing services.
+# --no-deps leaves rollout services to the rollout step.
 echo "::group::Deploying services without zero downtime rollout"
 REST_SERVICES=""
 for service in $(compose config --services); do
@@ -29,7 +30,7 @@ for service in $(compose config --services); do
 done
 if [ -n "$REST_SERVICES" ]; then
     # shellcheck disable=SC2086 # REST_SERVICES must be unquoted to pass multiple services
-    compose up --detach --pull always --quiet-pull $REST_SERVICES
+    compose up --detach --no-deps --quiet-pull $REST_SERVICES
 fi
 echo "::endgroup::"
 
