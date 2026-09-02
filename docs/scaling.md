@@ -18,7 +18,7 @@ services:
 You may also scale ad-hoc using the Docker CLI:
 
 ```bash
-docker service scale web=5  # Scale to 5 replicas
+docker compose up --detach --scale web=5  # Scale to 5 replicas
 ```
 
 ### Resource management
@@ -49,10 +49,6 @@ services:
 Most datacenters will offer VPS or dedicated servers in a variety of sizes and the ability to upgrade an existing server to a larger size. This is known as vertical scaling or scaling up.
 
 This will probably be the easiest way to scale your application, especially if you are just starting out. Simply upgrade your server to a larger size and The Box will automatically take advantage of the additional resources.
-
-### Scaling Horizontally
-
-When your application outgrows the resources of a single server, you can just add a second one. Docker [Swarm mode](https://docs.docker.com/engine/swarm/) is low effort way to just add more servers to your PaaS. Setup takes minutes and The Box will automatically distribute your applications across the available servers.
 
 ### Hyperscale
 
