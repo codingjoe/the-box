@@ -10,7 +10,7 @@ Dozzle binds to `127.0.0.1` on the Docker host.
 Forward the port to your machine with SSH and open `http://localhost:8080` in your web browser:
 
 ```bash
-ssh -L 8080:127.0.0.1:8080 <your-server>
+ssh -L 8080:127.0.0.1:8080 contributor@<your-server>
 ```
 
 SSH access to the server is the only authentication.
