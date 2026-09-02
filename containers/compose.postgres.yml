@@ -28,9 +28,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2' # Limit cores of the CPU
-          memory: 1G # Limit to 1GB of RAM
-    memswap_limit: 2g # Limit total memory + swap
+          cpus: '2'
+          memory: 1G
+    memswap_limit: 2g
   web:
     depends_on:
       - postgres

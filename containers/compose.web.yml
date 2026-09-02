@@ -1,7 +1,7 @@
 name: the-box-web
 services:
   web:
-    image: traefik/whoami:v1.12.0 # placeholder image for OCI artifact
+    image: traefik/whoami:v1.12.0
     environment:
       PORT: ${PORT:-8000}
       HOSTNAME: ${HOSTNAME:-localhost}
@@ -22,15 +22,15 @@ services:
       replicas: 2
       resources:
         limits:
-          cpus: '2' # Limit cores of the CPU
-          memory: 512M # Limit to 512MB of RAM
+          cpus: '2'
+          memory: 512M
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
-    memswap_limit: 1g # Limit total memory + swap
-    stop_grace_period: 1m # Allow up to 1 minute for graceful shutdown
+    memswap_limit: 1g
+    stop_grace_period: 1m
 networks:
   app:
     internal: true

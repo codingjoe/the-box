@@ -31,9 +31,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1' # Limit cores of the CPU
-          memory: 256M # Limit to 256MB of RAM
-    memswap_limit: 512m # Limit total memory + swap
+          cpus: '1'
+          memory: 256M
+    memswap_limit: 512m
   caddy-redis:
     image: redis:8.10.1-alpine
     volumes:
@@ -54,9 +54,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5' # Limit cores of the CPU
-          memory: 128M # Limit to 128MB of RAM
-    memswap_limit: 256m # Limit total memory + swap
+          cpus: '0.5'
+          memory: 128M
+    memswap_limit: 256m
   dozzle:
     image: amir20/dozzle:v10.8.0
     container_name: dozzle
@@ -78,9 +78,9 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5' # Limit cores of the CPU
-          memory: 128M # Limit to 128MB of RAM
-    memswap_limit: 256m # Limit total memory + swap
+          cpus: '0.5'
+          memory: 128M
+    memswap_limit: 256m
 networks:
   caddy:
     name: caddy
