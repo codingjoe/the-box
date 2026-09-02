@@ -1,3 +1,4 @@
+name: the-box
 include:
   - compose.app.yml
   - containers/compose.yml
