@@ -24,6 +24,12 @@ services:
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_1.0_tls='
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_1.1_proxy={{upstreams 6379}}'
       - 'caddy_1.servers.listener_wrappers.1_tls='
+    deploy:
+      resources:
+        limits:
+          cpus: '1' # Limit cores of the CPU
+          memory: 512M # Limit to 512MB of RAM
+    memswap_limit: 1g # Limit total memory + swap
   web:
     depends_on:
       - redis

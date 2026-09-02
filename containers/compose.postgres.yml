@@ -25,6 +25,12 @@ services:
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_0.1_tls.connection_policy.alpn=postgresql'
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_0.2_proxy={{upstreams 5432}}'
       - 'caddy_1.servers.listener_wrappers.1_tls='
+    deploy:
+      resources:
+        limits:
+          cpus: '2' # Limit cores of the CPU
+          memory: 1G # Limit to 1GB of RAM
+    memswap_limit: 2g # Limit total memory + swap
   web:
     depends_on:
       - postgres

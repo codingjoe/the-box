@@ -29,6 +29,7 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
+    memswap_limit: 1g # Limit total memory + swap
     stop_grace_period: 1m # Allow up to 1 minute for graceful shutdown
 networks:
   app:

@@ -28,6 +28,12 @@ services:
       - "dev.dozzle.group=the-box"
     cap_add:
       - NET_ADMIN
+    deploy:
+      resources:
+        limits:
+          cpus: '1' # Limit cores of the CPU
+          memory: 256M # Limit to 256MB of RAM
+    memswap_limit: 512m # Limit total memory + swap
   caddy-redis:
     image: redis:8.10.1-alpine
     volumes:
@@ -44,6 +50,12 @@ services:
       timeout: 10s
     labels:
       - "dev.dozzle.group=the-box"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5' # Limit cores of the CPU
+          memory: 128M # Limit to 128MB of RAM
+    memswap_limit: 256m # Limit total memory + swap
   dozzle:
     image: amir20/dozzle:v10.8.0
     container_name: dozzle
@@ -62,6 +74,12 @@ services:
       start_period: 5s
     labels:
       - "dev.dozzle.group=the-box"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5' # Limit cores of the CPU
+          memory: 128M # Limit to 128MB of RAM
+    memswap_limit: 256m # Limit total memory + swap
 networks:
   caddy:
     name: caddy
