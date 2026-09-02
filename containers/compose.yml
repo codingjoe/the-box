@@ -55,7 +55,7 @@ services:
           memory: 128M
     memswap_limit: 256m
   dozzle:
-    image: amir20/dozzle:v10.8.0
+    image: amir20/dozzle:v10.9.0
     container_name: dozzle
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
