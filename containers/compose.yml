@@ -78,8 +78,7 @@ networks:
     external: false
   dozzle:
     name: dozzle
-    internal: true
-    external: false
+    internal: false
 volumes:
   caddy_data:
   caddy_config:
