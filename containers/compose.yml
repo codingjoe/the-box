@@ -41,6 +41,7 @@ services:
       - caddy_redis:/data
     networks:
       - caddy-cache
+    command: [ "redis-server", "--maxmemory", "96mb", "--maxmemory-policy", "noeviction" ]
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
