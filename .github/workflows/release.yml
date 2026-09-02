@@ -13,118 +13,80 @@ concurrency:
 jobs:
   containers:
     name: Push image to GitHub Container Registry
-    runs-on: ${{ matrix.platform == 'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
+    uses: docker/github-builder/.github/workflows/build.yml@v1
     permissions:
       packages: write
       contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        container:
-          - caddy
-        platform:
-          - linux/amd64
-          - linux/arm64
-    steps:
-      - name: Prepare
-        run: |
-          platform=${{ matrix.platform }}
-          echo "PLATFORM_PAIR=${platform//\//-}" >> "$GITHUB_ENV"
-      - name: Check out the repo
-        uses: actions/checkout@v7
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4.6.0
-        with:
-          registry: ghcr.io
+      id-token: write
+    with:
+      output: image
+      push: true
+      context: containers/caddy
+      file: containers/caddy/Dockerfile
+      platforms: linux/amd64,linux/arm64
+      meta-images: ghcr.io/${{ github.repository_owner }}/the-box-caddy
+      meta-tags: |
+        type=ref,event=branch
+        type=ref,event=tag
+        type=semver,pattern={{version}}
+        type=semver,pattern={{major}}.{{minor}}
+        type=raw,value=latest
+      cache: true
+      cache-mode: max
+    secrets:
+      registry-auths: |
+        - registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.container }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-      - name: Build and push by digest
-        id: push
-        uses: docker/build-push-action@v7
-        with:
-          context: containers/${{ matrix.container }}
-          file: containers/${{ matrix.container }}/Dockerfile
-          platforms: ${{ matrix.platform }}
-          labels: ${{ steps.meta.outputs.labels }}
-          outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.container }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Export digest
-        run: |
-          mkdir -p /tmp/digests
-          digest="${{ steps.push.outputs.digest }}"
-          touch "/tmp/digests/${digest#sha256:}"
-      - name: Upload digest
-        uses: actions/upload-artifact@v4
-        with:
-          name: digests-${{ matrix.container }}-${{ env.PLATFORM_PAIR }}
-          path: /tmp/digests/*
-          if-no-files-found: error
-          retention-days: 1
-  merge:
-    name: Merge platform manifests
+  oci-artifacts-app:
+    name: OCI artifact
     needs: [containers]
     runs-on: ubuntu-latest
     permissions:
       packages: write
       contents: read
-      attestations: write
-      id-token: write
     strategy:
       fail-fast: false
       matrix:
-        container:
-          - caddy
+        service:
+          - postgres
+          - redis
     steps:
-      - name: Download digests
-        uses: actions/download-artifact@v4
-        with:
-          path: /tmp/digests
-          pattern: digests-${{ matrix.container }}-*
-          merge-multiple: true
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4.6.0
+      - uses: actions/checkout@v7
+      - uses: docker/login-action@v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ github.token }}
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.container }}
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-      - name: Create manifest list and push
-        working-directory: /tmp/digests
+      - uses: codingjoe/the-box/actions/compose@main
+      - run: docker compose --file containers/compose.web.yml --file containers/compose.${{ matrix.service }}.yml publish --yes ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
+      - name: Get image version
+        id: image-version
         run: |
-          image="ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.container }}"
-          args=()
-          while IFS= read -r tag; do
-            [ -n "${tag}" ] && args+=(-t "${tag}")
-          done <<< "${DOCKER_METADATA_OUTPUT_TAGS}"
-          args+=(-t "${image}:latest")
-          for digest in *; do
-            args+=("${image}@sha256:${digest}")
-          done
-          docker buildx imagetools create --metadata-file /tmp/metadata.json "${args[@]}"
-      - name: Get manifest digest
-        id: digest
-        run: |
-          digest="$(jq --raw-output '.["containerimage.descriptor"].digest' /tmp/metadata.json)"
-          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
-      - name: Inspect image
-        run: docker buildx imagetools inspect ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.container }}:${{ steps.meta.outputs.version }}
-      - name: Generate artifact attestation
-        uses: actions/attest-build-provenance@v4
+          image="$(awk '$1 == "image:" {print $2; exit}' containers/compose.${{ matrix.service }}.yml)"
+          echo "version=${image##*:}" >> "$GITHUB_OUTPUT"
+      - uses: codingjoe/the-box/actions/annotate@main
         with:
-          subject-name: ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.container }}
-          subject-digest: ${{ steps.digest.outputs.digest }}
-          push-to-registry: true
+          reference: ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
+          description: The Box ${{ matrix.service }} compose stack
+          version: ${{ steps.image-version.outputs.version }}
+  oci-artifacts-box:
+    name: OCI artifact
+    needs: [containers]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - uses: codingjoe/the-box/actions/compose@main
+      - run: docker compose --file containers/compose.yml publish --yes ghcr.io/${{ github.repository_owner }}/the-box:${{ github.ref_name }}
+      - uses: codingjoe/the-box/actions/annotate@main
+        with:
+          reference: ghcr.io/${{ github.repository_owner }}/the-box:${{ github.ref_name }}
+          description: The Box compose stack
