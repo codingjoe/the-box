@@ -128,3 +128,55 @@ jobs:
           subject-name: ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.container }}
           subject-digest: ${{ steps.digest.outputs.digest }}
           push-to-registry: true
+  oci-artifacts-app:
+    name: OCI artifact
+    needs: [containers]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - postgres
+          - redis
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - uses: codingjoe/the-box/actions/compose@main
+      - run: docker compose --file containers/compose.web.yml --file containers/compose.${{ matrix.service }}.yml publish --yes ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
+      - name: Get image version
+        id: image-version
+        run: |
+          image="$(awk '$1 == "image:" {print $2; exit}' containers/compose.${{ matrix.service }}.yml)"
+          echo "version=${image##*:}" >> "$GITHUB_OUTPUT"
+      - uses: codingjoe/the-box/actions/annotate@main
+        with:
+          reference: ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
+          description: The Box ${{ matrix.service }} compose stack
+          version: ${{ steps.image-version.outputs.version }}
+  oci-artifacts-box:
+    name: OCI artifact
+    needs: [containers]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - uses: codingjoe/the-box/actions/compose@main
+      - run: docker compose --file containers/compose.yml publish --yes ghcr.io/${{ github.repository_owner }}/the-box:${{ github.ref_name }}
+      - uses: codingjoe/the-box/actions/annotate@main
+        with:
+          reference: ghcr.io/${{ github.repository_owner }}/the-box:${{ github.ref_name }}
+          description: The Box compose stack
