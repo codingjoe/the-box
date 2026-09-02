@@ -78,6 +78,10 @@ jobs:
           password: ${{ github.token }}
       - uses: codingjoe/the-box/actions/compose@main
       - run: docker compose --file containers/compose.web.yml --file containers/compose.${{ matrix.service }}.yml publish --yes ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
+      - uses: codingjoe/the-box/actions/annotate@main
+        with:
+          reference: ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
+          description: The Box ${{ matrix.service }} compose stack
   oci-artifacts-box:
     name: OCI artifact
     needs: [containers]
@@ -94,3 +98,7 @@ jobs:
           password: ${{ github.token }}
       - uses: codingjoe/the-box/actions/compose@main
       - run: docker compose --file containers/compose.yml publish --yes ghcr.io/${{ github.repository_owner }}/the-box:${{ github.ref_name }}
+      - uses: codingjoe/the-box/actions/annotate@main
+        with:
+          reference: ghcr.io/${{ github.repository_owner }}/the-box:${{ github.ref_name }}
+          description: The Box compose stack
