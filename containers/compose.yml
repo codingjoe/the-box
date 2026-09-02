@@ -1,7 +1,7 @@
 name: the-box
 services:
   caddy:
-    image: codingjoe/the-box-caddy:main
+    image: ghcr.io/codingjoe/the-box-caddy:main
     container_name: caddy
     depends_on:
       - caddy-redis

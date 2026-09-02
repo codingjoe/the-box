@@ -39,11 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: codingjoe/the-box/actions/compose@main
-      - run: docker compose --file containers/compose.web.yml --file containers/compose.${{ matrix.service }}.yml publish --yes --dry-run ${{ github.actor }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
+      - run: docker compose --file containers/compose.web.yml --file containers/compose.${{ matrix.service }}.yml publish --yes --dry-run ghcr.io/${{ github.repository_owner }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
   oci-artifacts-box:
     name: OCI artifact
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: codingjoe/the-box/actions/compose@main
-      - run: docker compose --file containers/compose.yml publish --yes --dry-run ${{ github.actor }}/the-box:${{ github.ref_name }}
+      - run: docker compose --file containers/compose.yml publish --yes --dry-run ghcr.io/${{ github.repository_owner }}/the-box:${{ github.ref_name }}
