@@ -3,7 +3,8 @@
 Deploy an application to a server using Docker Compose over SSH.
 The action pulls the pre-built images that the CI workflow published to the GitHub Container Registry.
 The server never builds images itself, which keeps the load on small servers low.
-The deploy action updates traffic facing services without downtime. It recreates all other services.
+The deploy action updates traffic facing services without downtime.
+It recreates all other services, but only when their configuration or image tag changed.
 
 ## Usage
 
@@ -64,7 +65,8 @@ Apps with multiple traffic facing services set `rollout-services`:
       rollout-services: web mta msa
 ```
 
-The deploy action recreates all other services.
+The deploy action recreates all other services, but only when their configuration or image tag changed.
+An unchanged tag, like `postgres:17`, does not restart its service, even when the registry re-pushes the tag.
 Docker Compose honors `stop_grace_period` when it stops a service, so workers can drain.
 One-shot services, like database migrations, run before the rollout starts new replicas.
 The rollout service must depend on the one-shot service with `service_completed_successfully`, as in the [relay](https://github.com/codingjoe/relay) example.
