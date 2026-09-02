@@ -2,6 +2,9 @@ services:
   caddy:
     image: codingjoe/the-box-caddy:main
     container_name: caddy
+    depends_on:
+      caddy-redis:
+        condition: service_healthy
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
