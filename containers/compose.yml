@@ -28,6 +28,12 @@ services:
       - "dev.dozzle.group=the-box"
     cap_add:
       - NET_ADMIN
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+    memswap_limit: 512m
   caddy-redis:
     image: redis:8.10.1-alpine
     volumes:
@@ -35,6 +41,7 @@ services:
       - caddy_redis:/data
     networks:
       - caddy-cache
+    command: [ "redis-server", "--maxmemory", "96mb", "--maxmemory-policy", "noeviction" ]
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "redis-cli", "ping" ]
@@ -44,6 +51,12 @@ services:
       timeout: 10s
     labels:
       - "dev.dozzle.group=the-box"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+    memswap_limit: 256m
   dozzle:
     image: amir20/dozzle:v10.8.0
     container_name: dozzle
@@ -62,6 +75,12 @@ services:
       start_period: 5s
     labels:
       - "dev.dozzle.group=the-box"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+    memswap_limit: 256m
 networks:
   caddy:
     name: caddy
