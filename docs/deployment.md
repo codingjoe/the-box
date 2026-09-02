@@ -67,6 +67,7 @@ The deployment workflow performs the following steps:
 1. **Application Start**: It pulls the published images and starts the application containers. The deployment updates traffic facing services without downtime. Your server never builds images itself, which keeps the load on your server low.
 
 Your application will be served via a Caddy reverse proxy, which also handles automatic SSL certificate provisioning.
+Caddy compresses responses with zstd, Brotli, or gzip and caches them in Redis, so your application servers do less work.
 
 ### Zero-downtime deployments
 

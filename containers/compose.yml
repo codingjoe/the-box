@@ -16,6 +16,7 @@ services:
     networks:
       - caddy
       - caddy-wan
+      - caddy-cache
     command: [ "docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile" ]
     restart: unless-stopped
     healthcheck:
@@ -26,6 +27,40 @@ services:
       - NET_ADMIN
     deploy:
       mode: global
+  caddy-redis:
+    image: redis:8.10.1-alpine
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - caddy_redis:/data
+    networks:
+      - caddy-cache
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    labels:
+      - "dev.dozzle.group=the-box"
+  dozzle:
+    image: amir20/dozzle:v10.8.0
+    container_name: dozzle
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - '127.0.0.1:8080:8080'
+    networks:
+      - dozzle
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "/dozzle", "healthcheck" ]
+      interval: 5s
+      retries: 5
+      start_period: 5s
+    labels:
+      - "dev.dozzle.group=the-box"
 networks:
   caddy:
     name: caddy
@@ -34,6 +69,15 @@ networks:
   caddy-wan:
     name: caddy-wan
     internal: false
+  caddy-cache:
+    name: caddy-cache
+    internal: true
+    external: false
+  dozzle:
+    name: dozzle
+    internal: true
+    external: false
 volumes:
   caddy_data:
   caddy_config:
+  caddy_redis:
