@@ -60,6 +60,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /etc/localtime:/etc/localtime:ro
+    environment:
+      # Container actions (start, stop, restart) and shell access from the UI.
+      # Dozzle binds to 127.0.0.1 only, so SSH access gates both features.
+      DOZZLE_ENABLE_ACTIONS: true
+      DOZZLE_ENABLE_SHELL: true
+      # Read-only MCP endpoint for AI coding assistants at /api/mcp.
+      DOZZLE_ENABLE_MCP: true
     ports:
       - '127.0.0.1:8080:8080'
     networks:

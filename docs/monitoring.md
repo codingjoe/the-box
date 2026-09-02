@@ -16,6 +16,10 @@ ssh -L 8080:127.0.0.1:8080 <your-server>
 SSH access to the server is the only authentication.
 Dozzle needs no additional login.
 
+Dozzle has container actions and shell access enabled.
+You can start, stop, and restart containers, or open a shell, from the dropdown next to the container stats.
+Use these tools with care.
+
 To access via shell, use the following commands:
 
 ```bash
@@ -28,6 +32,26 @@ The install script creates a `.dtop.yml` configuration file for your project wit
 
 The Box provides only basic monitoring tools out of the box to help you assess your container health. For more advanced monitoring, logging, and alerting capabilities, consider integrating third-party services such as [Sentry].
 
+## MCP Endpoint
+
+Dozzle exposes a read-only [MCP] endpoint for AI coding assistants at `/api/mcp`.
+Forward the port as shown above, then add the server to your MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "dozzle": {
+      "type": "http",
+      "url": "http://127.0.0.1:8080/api/mcp"
+    }
+  }
+}
+```
+
+The tools are read-only.
+They list containers and hosts, and fetch or search container logs.
+
 [dozzle]: https://dozzle.dev/
 [dtop]: https://dtop.dev/
+[mcp]: https://modelcontextprotocol.io/
 [sentry]: https://sentry.io/welcome/
