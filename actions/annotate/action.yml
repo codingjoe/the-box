@@ -17,7 +17,7 @@ inputs:
   url:
     description: "Project website."
     required: false
-    default: 'https://github.com/${{ github.repository }}'
+    default: 'https://the-box.sh'
   version:
     description: "Version of the artifact."
     required: false
