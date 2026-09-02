@@ -10,14 +10,11 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - caddy_data:/data
       - caddy_config:/config
-    environment:
-      CADDY_INGRESS_NETWORKS: caddy
     ports:
       - '0.0.0.0:80:80'
       - '0.0.0.0:443:443'
       - '0.0.0.0:443:443/udp'
     networks:
-      - caddy
       - caddy-wan
       - caddy-cache
     command: [ "docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile" ]
@@ -82,10 +79,6 @@ services:
           memory: 128M
     memswap_limit: 256m
 networks:
-  caddy:
-    name: caddy
-    internal: true
-    external: false
   caddy-wan:
     name: caddy-wan
     internal: false

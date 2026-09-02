@@ -102,6 +102,8 @@ flowchart LR
 The Box uses a GitOps approach to deploy and manage your applications. GitHub is used as the single source of truth for application code, configuration, and secrets and authentication for staff.
 The [Docker] host runs the applications in lightweight containers, managed by Docker Compose. A [Caddy] load balancer handles incoming traffic, providing automatic HTTPS and routing requests to the appropriate web servers. Each application has its own PostgreSQL database and Redis instance for caching.
 
+Applications are isolated from each other on the Docker host. Every application has its own internal `app` network for traffic between the web servers and their databases, plus its own ingress network that Caddy joins on deployment. Applications cannot see or reach other applications or their databases. Caddy exposes PostgreSQL and Redis over TLS on the default ports (`pg.example.com`, `redis.example.com`). These TLS endpoints are shared per host. Run only one application with database exposure per box, or connections may reach a different application's database.
+
 [12-factor]: https://12factor.net/
 [caddy]: https://caddyserver.com/
 [dependabot]: https://github.com/dependabot
