@@ -28,8 +28,6 @@ services:
       - "dev.dozzle.group=the-box"
     cap_add:
       - NET_ADMIN
-    deploy:
-      mode: global
   caddy-redis:
     image: redis:8.10.1-alpine
     volumes:

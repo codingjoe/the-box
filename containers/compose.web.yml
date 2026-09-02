@@ -18,18 +18,11 @@ services:
       - "caddy.reverse_proxy.health_headers.X-Forwarded-Proto=https"
       - "caddy.cache"
     deploy:
-      mode: replicated
       replicas: 2
       resources:
         limits:
           cpus: '2' # Limit cores of the CPU
           memory: 512M # Limit to 512MB of RAM
-      update_config:
-        parallelism: 1
-        delay: 1m
-        order: start-first
-        failure_action: rollback
-        monitor: 1m
       restart_policy:
         condition: on-failure
         delay: 5s
