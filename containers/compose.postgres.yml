@@ -1,7 +1,7 @@
 name: the-box-postgres
 services:
   postgres:
-    image: supabase/postgres:17.9.0.020-orioledb
+    image: supabase/postgres:17.9.0.021-orioledb
     volumes:
       - postgres:/var/lib/postgresql/data
     environment:
