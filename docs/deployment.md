@@ -98,6 +98,8 @@ The rollout service must depend on the one-shot service with `service_completed_
 Rollout services must not publish host ports or define a `container_name`, because old and new containers run in parallel.
 TCP traffic must use the Caddy proxy.
 [relay](https://github.com/codingjoe/relay) uses layer 4 labels for SMTP.
+Caddy publishes the SMTP host ports 25, 465, and 587, so the layer 4 routes are reachable from the internet.
+PostgreSQL and Redis share port 443 by SNI, but SMTP cannot, because clients only connect to the fixed submission and MX ports.
 
 Rollout services must define a healthcheck.
 Then the deployment waits until the new containers are healthy.

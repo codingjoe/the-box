@@ -11,9 +11,12 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     ports:
+      - '0.0.0.0:25:25'
       - '0.0.0.0:80:80'
       - '0.0.0.0:443:443'
       - '0.0.0.0:443:443/udp'
+      - '0.0.0.0:465:465'
+      - '0.0.0.0:587:587'
     networks:
       - caddy-wan
       - caddy-cache
