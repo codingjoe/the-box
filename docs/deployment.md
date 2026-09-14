@@ -65,6 +65,7 @@ The deployment workflow performs the following steps:
 1. **Environment Setup**: It sets up an SSH connection to your production server using the configured secrets.
 1. **Remote Deployment**: It establishes a remote Docker context to your server.
 1. **Application Start**: It pulls the published images and starts the application containers. The deployment updates traffic facing services without downtime. Your server never builds images itself, which keeps the load on your server low.
+1. **Housekeeping**: It removes unused containers, images and build cache older than `prune-older-than` (72 hours by default, an empty value skips it). The prune covers all apps on the server, but never removes resources that a container uses.
 
 Your application will be served via a Caddy reverse proxy, which also handles automatic SSL certificate provisioning.
 Caddy compresses responses with zstd, Brotli, or gzip and caches them in Redis, so your application servers do less work.

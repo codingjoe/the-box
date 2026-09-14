@@ -5,6 +5,8 @@ The action pulls the pre-built images that the CI workflow published to the GitH
 The server never builds images itself, which keeps the load on small servers low.
 The deploy action updates traffic facing services without downtime.
 It recreates all other services, but only when their configuration or image tag changed.
+After a successful deployment, the action removes unused containers, images and build cache older than the `prune-older-than` input (72 hours by default, an empty value skips it).
+The prune covers all apps on the server, but never removes resources that a container uses.
 
 ## Usage
 
