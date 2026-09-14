@@ -22,6 +22,21 @@ The install script creates a `.dtop.yml` configuration file for your project wit
 
 The Box provides only basic monitoring tools out of the box to help you assess your container health. For more advanced monitoring, logging, and alerting capabilities, consider integrating third-party services such as [Sentry].
 
+## PostgreSQL query statistics
+
+The managed PostgreSQL server preloads [pg_stat_statements] and creates the extension when it initializes a new data directory. Query the collected statistics from outside the Box, as described in [environment](environment.md):
+
+```bash
+psql "postgresql://postgres:${POSTGRES_PASSWORD}@pg.${HOSTNAME}:443/postgres?sslmode=require" \
+    --command "SELECT calls, mean_exec_time, query FROM pg_stat_statements ORDER BY mean_exec_time DESC LIMIT 10"
+```
+
+Run `SELECT pg_stat_statements_reset();` to discard the collected statistics.
+
+> [!NOTE]
+> Databases created before the extension was added require `CREATE EXTENSION pg_stat_statements;` once.
+
 [dozzle]: https://dozzle.dev/
 [dtop]: https://dtop.dev/
+[pg_stat_statements]: https://www.postgresql.org/docs/current/pgstatstatements.html
 [sentry]: https://sentry.io/welcome/

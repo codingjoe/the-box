@@ -72,7 +72,7 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - uses: codingjoe/the-box/actions/compose@main
-      - run: docker stack config --skip-interpolation -c containers/compose.web.yml -c containers/compose.${{ matrix.service }}.yml > compose.${{ matrix.service }}.compiled.yml
+      - run: docker compose --file containers/compose.web.yml --file containers/compose.${{ matrix.service }}.yml config --no-interpolate --no-normalize > compose.${{ matrix.service }}.compiled.yml
       - run: docker compose --file compose.${{ matrix.service }}.compiled.yml publish --yes ${{ github.actor }}/the-box-${{ matrix.service }}:${{ github.ref_name }}
       - uses: actions/upload-artifact@v7
         with:
