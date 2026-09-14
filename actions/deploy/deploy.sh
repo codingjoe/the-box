@@ -5,6 +5,7 @@ COMPOSE_FILE="${COMPOSE_FILE:?COMPOSE_FILE is required}"
 PROJECT_NAME="${PROJECT_NAME:?PROJECT_NAME is required}"
 ROLLOUT_SERVICES="${ROLLOUT_SERVICES:-web}"
 ROLLOUT_TIMEOUT="${ROLLOUT_TIMEOUT:-120}"
+PRUNE_OLDER_THAN="${PRUNE_OLDER_THAN-72h}"
 
 compose() {
     docker compose --file "$COMPOSE_FILE" --project-name "$PROJECT_NAME" "$@"
@@ -47,3 +48,12 @@ echo "::group::Connecting caddy to ingress network"
 docker network connect "${PROJECT_NAME}_ingress" caddy 2>/dev/null ||
 echo "Caddy is already connected to ${PROJECT_NAME}_ingress"
 echo "::endgroup::"
+
+if [ -n "$PRUNE_OLDER_THAN" ]; then
+    echo "::group::Pruning unused resources older than $PRUNE_OLDER_THAN"
+    # Containers first, so their images become free in the same run.
+    docker container prune --force --filter "until=$PRUNE_OLDER_THAN"
+    docker image prune --all --force --filter "until=$PRUNE_OLDER_THAN"
+    docker builder prune --force --filter "until=$PRUNE_OLDER_THAN"
+    echo "::endgroup::"
+fi

@@ -30,6 +30,10 @@ inputs:
     description: 'Seconds to wait for new containers to become healthy before rollback. Must be more than the healthcheck start_period plus interval times retries.'
     required: false
     default: '120'
+  prune-older-than:
+    description: 'Remove unused resources older than this duration (for example, "72h"). An empty value skips the housekeeping.'
+    required: false
+    default: '72h'
 runs:
   using: "composite"
   steps:
@@ -65,6 +69,7 @@ runs:
         PROJECT_NAME: ${{ github.event.repository.name }}-${{ github.ref_name }}
         ROLLOUT_SERVICES: ${{ inputs.rollout-services }}
         ROLLOUT_TIMEOUT: ${{ inputs.rollout-timeout }}
+        PRUNE_OLDER_THAN: ${{ inputs.prune-older-than }}
         HOSTNAME: ${{ inputs.hostname }}
         DOTENV_PRIVATE_KEY: ${{ inputs.dotenv-private-key }}
         IMAGE_TAG: sha-${{ github.event.workflow_run.head_sha || github.sha }}
