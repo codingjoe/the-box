@@ -3,7 +3,6 @@ services:
   postgres:
     image: postgres:18.6
     volumes:
-      # PostgreSQL 18 images use a major version specific PGDATA and expect a mount at /var/lib/postgresql
       - postgres:/var/lib/postgresql
     configs:
       - source: pg_stat_statements
