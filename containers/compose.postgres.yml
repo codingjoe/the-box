@@ -1,14 +1,18 @@
 name: the-box-postgres
 services:
   postgres:
-    image: supabase/postgres:17.9.0.024-orioledb
+    image: postgres:18.6
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres:/var/lib/postgresql
+    configs:
+      - source: pg_stat_statements
+        target: /docker-entrypoint-initdb.d/10-pg_stat_statements.sql
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - app
       - ingress
+    command: [ "postgres", "-c", "shared_preload_libraries=pg_stat_statements" ]
     restart: unless-stopped
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d postgres" ]
@@ -39,3 +43,7 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres/postgres
 volumes:
   postgres:
+configs:
+  pg_stat_statements:
+    content: |
+      CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
