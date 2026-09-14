@@ -1,3 +1,4 @@
+name: the-box-postgres
 services:
   postgres:
     image: postgres:18.6
@@ -11,7 +12,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - app
-      - caddy
+      - ingress
     command: [ "postgres", "-c", "shared_preload_libraries=pg_stat_statements" ]
     restart: unless-stopped
     healthcheck:
@@ -23,12 +24,19 @@ services:
     labels:
       - "caddy=pg.${HOSTNAME:-localhost}"
       - "caddy.respond=OK"
+      - "dev.dozzle.url=postgresql://postgres:${POSTGRES_PASSWORD}@pg.${HOSTNAME:-localhost}:443/postgres?sslmode=require"
       - 'caddy_1.servers.listener_wrappers.0_layer4.@pg_tls.postgres.tls=enabled'
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_0=@pg_tls'
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_0.0_postgres_tls='
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_0.1_tls.connection_policy.alpn=postgresql'
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_0.2_proxy={{upstreams 5432}}'
       - 'caddy_1.servers.listener_wrappers.1_tls='
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+    memswap_limit: 2g
   web:
     depends_on:
       - postgres

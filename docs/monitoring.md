@@ -6,9 +6,19 @@ Monitoring is a crucial aspect of managing applications deployed on The Box. It 
 
 The Box integrates [Dozzle] and [dtop] to provide real-time monitoring and logging capabilities.
 
-To access the monitoring tools, navigate to the following URLs in your web browser:
+Dozzle binds to `127.0.0.1` on the Docker host.
+Forward the port to your machine with SSH and open `http://localhost:8080` in your web browser:
 
-- Dozzle: `http://logs.<your-domain>`
+```bash
+ssh -L 8080:127.0.0.1:8080 contributor@<your-server>
+```
+
+SSH access to the server is the only authentication.
+Dozzle needs no additional login.
+
+Dozzle has container actions and shell access enabled.
+You can start, stop, and restart containers, or open a shell, from the dropdown next to the container stats.
+Use these tools with care.
 
 To access via shell, use the following commands:
 
@@ -22,9 +32,29 @@ The install script creates a `.dtop.yml` configuration file for your project wit
 
 The Box provides only basic monitoring tools out of the box to help you assess your container health. For more advanced monitoring, logging, and alerting capabilities, consider integrating third-party services such as [Sentry].
 
+## MCP Endpoint
+
+Dozzle exposes a read-only [MCP] endpoint for AI coding assistants at `/api/mcp`.
+Forward the port as shown above, then add the server to your MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "dozzle": {
+      "type": "http",
+      "url": "http://127.0.0.1:8080/api/mcp"
+    }
+  }
+}
+```
+
+The tools are read-only.
+They list containers and hosts, and fetch or search container logs.
+
 ## PostgreSQL query statistics
 
-The managed PostgreSQL server preloads [pg_stat_statements] and creates the extension when it initializes a new data directory. Query the collected statistics from outside the Box, as described in [environment](environment.md):
+The managed PostgreSQL server preloads [pg_stat_statements] and creates the extension when it initializes a new data directory.
+Query the collected statistics from outside the Box, as described in [environment](environment.md):
 
 ```bash
 psql "postgresql://postgres:${POSTGRES_PASSWORD}@pg.${HOSTNAME}:443/postgres?sslmode=require" \
@@ -38,5 +68,6 @@ Run `SELECT pg_stat_statements_reset();` to discard the collected statistics.
 
 [dozzle]: https://dozzle.dev/
 [dtop]: https://dtop.dev/
+[mcp]: https://modelcontextprotocol.io/
 [pg_stat_statements]: https://www.postgresql.org/docs/current/pgstatstatements.html
 [sentry]: https://sentry.io/welcome/

@@ -1,5 +1,9 @@
 {
-  cache
+  cache {
+    redis {
+      url caddy-redis:6379
+    }
+  }
   log {
     output stdout
     format json

@@ -1,3 +1,4 @@
+name: the-box-app
 include:
   - containers/compose.postgres.yml
   - containers/compose.redis.yml

@@ -214,6 +214,3 @@ backups/
 
 # Backup encryption private keys
 .box/*.key
-
-# compiled compose artifacts
-compose.*.compiled.yml

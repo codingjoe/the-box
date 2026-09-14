@@ -11,7 +11,6 @@ The default variables are set:
 - `HOSTNAME`: The hostname of your application.
 - `DATABASE_URL`: The URL for your database connection.
 - `REDIS_URL`: The URL for your Redis instance.
-- `EMAIL_URL`: The URL to your SMTP relay instance.
 
 ## External database access
 

@@ -1,12 +1,13 @@
+name: the-box-redis
 services:
   redis:
-    image: redis:8.10.0-alpine
+    image: redis:8.10.1-alpine
     volumes:
       - redis:/data
     networks:
       - app
-      - caddy
-    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
+      - ingress
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}", "--maxmemory", "384mb", "--maxmemory-policy", "allkeys-lru" ]
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "redis-cli", "--pass", "${REDIS_PASSWORD}", "ping" ]
@@ -17,12 +18,19 @@ services:
     labels:
       - "caddy=redis.${HOSTNAME:-localhost}"
       - "caddy.respond=OK"
+      - "dev.dozzle.url=rediss://:${REDIS_PASSWORD}@redis.${HOSTNAME:-localhost}:443/"
       - 'caddy_1.servers.listener_wrappers.0_layer4.@tls-redis=tls'
       - 'caddy_1.servers.listener_wrappers.0_layer4.@tls-redis.sni=redis.${HOSTNAME:-localhost}'
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_1=@tls-redis'
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_1.0_tls='
       - 'caddy_1.servers.listener_wrappers.0_layer4.route_1.1_proxy={{upstreams 6379}}'
       - 'caddy_1.servers.listener_wrappers.1_tls='
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+    memswap_limit: 1g
   web:
     depends_on:
       - redis

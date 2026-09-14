@@ -1,39 +1,103 @@
+name: the-box
 services:
   caddy:
-    image: codingjoe/the-box-caddy:main
+    image: ghcr.io/codingjoe/the-box-caddy:main
     container_name: caddy
+    depends_on:
+      - caddy-redis
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /etc/localtime:/etc/localtime:ro
       - caddy_data:/data
       - caddy_config:/config
-    environment:
-      CADDY_INGRESS_NETWORKS: caddy
     ports:
+      - '0.0.0.0:25:25'
       - '0.0.0.0:80:80'
       - '0.0.0.0:443:443'
       - '0.0.0.0:443:443/udp'
+      - '0.0.0.0:465:465'
+      - '0.0.0.0:587:587'
     networks:
-      - caddy
       - caddy-wan
+      - caddy-cache
     command: [ "docker-proxy", "--caddyfile-path", "/etc/caddy/Caddyfile" ]
     restart: unless-stopped
     healthcheck:
       test: caddy validate --config /etc/caddy/Caddyfile
     labels:
       - "dev.dozzle.group=the-box"
+      - "dev.dozzle.icon=caddy"
     cap_add:
       - NET_ADMIN
     deploy:
-      mode: global
+      resources:
+        limits:
+          cpus: '1'
+          memory: 256M
+    memswap_limit: 512m
+  caddy-redis:
+    image: redis:8.10.1-alpine
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - caddy_redis:/data
+    networks:
+      - caddy-cache
+    command: [ "redis-server", "--maxmemory", "96mb", "--maxmemory-policy", "noeviction" ]
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+    labels:
+      - "dev.dozzle.group=the-box"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+    memswap_limit: 256m
+  dozzle:
+    image: amir20/dozzle:v11.0.1
+    container_name: dozzle
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      DOZZLE_ENABLE_ACTIONS: true
+      DOZZLE_ENABLE_SHELL: true
+      DOZZLE_ENABLE_MCP: true
+    ports:
+      - '127.0.0.1:8080:8080'
+    networks:
+      - dozzle
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "/dozzle", "healthcheck" ]
+      interval: 5s
+      retries: 5
+      start_period: 5s
+    labels:
+      - "dev.dozzle.group=the-box"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 128M
+    memswap_limit: 256m
 networks:
-  caddy:
-    name: caddy
-    internal: true
-    external: false
   caddy-wan:
     name: caddy-wan
+    internal: false
+  caddy-cache:
+    name: caddy-cache
+    internal: true
+    external: false
+  dozzle:
+    name: dozzle
     internal: false
 volumes:
   caddy_data:
   caddy_config:
+  caddy_redis:

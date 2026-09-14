@@ -11,9 +11,16 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - if: ${{ inputs.version != 'latest' }}
-      run: sudo curl -sSLo "/usr/libexec/docker/cli-plugins/docker-compose" "https://github.com/docker/compose/releases/download/${{ inputs.version }}/docker-compose-linux-x86_64"
-      shell: sh
-    - if: ${{ inputs.version == 'latest' }}
-      run: sudo curl -sSLo "/usr/libexec/docker/cli-plugins/docker-compose" "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64"
-      shell: sh
+    - shell: sh
+      run: |
+        case "$(uname -m)" in
+          x86_64 | amd64) arch=x86_64 ;;
+          aarch64 | arm64) arch=aarch64 ;;
+          *) echo "::error::Unsupported architecture: $(uname -m)"; exit 1 ;;
+        esac
+        if [ "${{ inputs.version }}" = "latest" ]; then
+          url="https://github.com/docker/compose/releases/latest/download/docker-compose-linux-${arch}"
+        else
+          url="https://github.com/docker/compose/releases/download/${{ inputs.version }}/docker-compose-linux-${arch}"
+        fi
+        sudo curl -sSLo "/usr/libexec/docker/cli-plugins/docker-compose" "$url"

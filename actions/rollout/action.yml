@@ -1,0 +1,30 @@
+name: "Docker Rollout"
+description: "Install the docker-rollout Docker CLI plugin for zero downtime deployments."
+branding:
+  icon: 'anchor'
+  color: 'blue'
+inputs:
+  version:
+    description: "Version of the docker-rollout plugin to install (e.g., v0.14)"
+    required: false
+    default: "latest"
+runs:
+  using: "composite"
+  steps:
+    - name: Install docker-rollout plugin
+      if: ${{ inputs.version != 'latest' }}
+      run: |
+        mkdir -p ~/.docker/cli-plugins
+        curl -fsSLo ~/.docker/cli-plugins/docker-rollout "https://github.com/wowu/docker-rollout/releases/download/${{ inputs.version }}/docker-rollout"
+        chmod +x ~/.docker/cli-plugins/docker-rollout
+      shell: sh
+    - name: Install latest docker-rollout plugin
+      if: ${{ inputs.version == 'latest' }}
+      run: |
+        mkdir -p ~/.docker/cli-plugins
+        curl -fsSLo ~/.docker/cli-plugins/docker-rollout "https://github.com/wowu/docker-rollout/releases/latest/download/docker-rollout"
+        chmod +x ~/.docker/cli-plugins/docker-rollout
+      shell: sh
+    - name: Verify docker-rollout plugin
+      run: docker rollout --version
+      shell: sh
