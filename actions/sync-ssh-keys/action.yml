@@ -78,7 +78,9 @@ runs:
               # Add each key with command restriction
               while IFS= read -r key; do
                 if [ -n "$key" ]; then
-                  authorized_keys+="command=\"docker system dial-stdio\",no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty $key $username\n"
+                  # The forced command already covers the Docker API, so the only forward we allow is Dozzle on the host loopback.
+                  # permitopen matches the destination literally, so clients must use exactly 127.0.0.1.
+                  authorized_keys+="command=\"docker system dial-stdio\",no-X11-forwarding,no-agent-forwarding,no-pty,permitopen=\"127.0.0.1:8080\" $key $username\n"
                 fi
               done <<< "$keys"
               authorized_keys+="\n"
