@@ -7,11 +7,15 @@ Monitoring is a crucial aspect of managing applications deployed on The Box. It 
 The Box integrates [Dozzle] and [dtop] to provide real-time monitoring and logging capabilities.
 
 Dozzle binds to `127.0.0.1` on the Docker host.
-Forward the port to your machine with SSH and open `http://localhost:8080` in your web browser:
+Forward the port to your machine with SSH and open `http://localhost:5000` in your web browser:
 
 ```bash
-ssh -L 8080:127.0.0.1:8080 contributor@<your-server>
+ssh -L 5000:127.0.0.1:8080 collaborator@<your-server>
 ```
+
+The local port is yours to choose, and so is the destination spelling.
+The pinned SSH key permits `127.0.0.1:8080` and `localhost:8080`, exactly as written, so `ssh -L 5000:localhost:8080 collaborator@<your-server>` works too.
+Any other destination is refused with `open failed: administratively prohibited`.
 
 SSH access to the server is the only authentication.
 Dozzle needs no additional login.
@@ -42,7 +46,7 @@ Forward the port as shown above, then add the server to your MCP client configur
   "mcpServers": {
     "dozzle": {
       "type": "http",
-      "url": "http://127.0.0.1:8080/api/mcp"
+      "url": "http://127.0.0.1:5000/api/mcp"
     }
   }
 }
