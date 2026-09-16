@@ -14,13 +14,7 @@ ssh -L 5000:127.0.0.1:8080 collaborator@<your-server>
 ```
 
 The local port is yours to choose, and so is the destination spelling.
-The pinned SSH key permits `127.0.0.1:8080` and `localhost:8080`, exactly as written, which both reach the same Dozzle instance:
-
-```bash
-ssh -L 5000:127.0.0.1:8080 collaborator@<your-server>
-ssh -L 5000:localhost:8080 collaborator@<your-server>
-```
-
+The pinned SSH key permits `127.0.0.1:8080` and `localhost:8080`, exactly as written, so `ssh -L 5000:localhost:8080 collaborator@<your-server>` works too.
 Any other destination is refused with `open failed: administratively prohibited`.
 
 SSH access to the server is the only authentication.
