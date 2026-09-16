@@ -75,16 +75,19 @@ runs:
               key_count=$(echo "$keys" | wc -l)
               echo "::debug::Found $key_count SSH key(s) for $username"
 
+              if [ -n "$authorized_keys" ]; then
+                authorized_keys+=$'\n'
+              fi
+
               # Add each key with command restriction
               while IFS= read -r key; do
                 if [ -n "$key" ]; then
                   # The forced command already covers the Docker API, so the only forward we allow is Dozzle on the host loopback.
                   # permitopen matches the requested destination literally, so it lists both spellings users type: 127.0.0.1 and localhost.
                   # Each stays scoped to port 8080, and the host resolves the name when it opens the connection.
-                  authorized_keys+="command=\"docker system dial-stdio\",no-X11-forwarding,no-agent-forwarding,no-pty,permitopen=\"127.0.0.1:8080\",permitopen=\"localhost:8080\" $key $username\n"
+                  authorized_keys+="command=\"docker system dial-stdio\",no-X11-forwarding,no-agent-forwarding,no-pty,permitopen=\"127.0.0.1:8080\",permitopen=\"localhost:8080\" $key $username"$'\n'
                 fi
               done <<< "$keys"
-              authorized_keys+="\n"
             else
               echo "::warning::No SSH keys found for $username"
             fi
@@ -135,7 +138,7 @@ runs:
         echo "::debug::Syncing SSH keys to ${{ inputs.ssh-host }}"
 
         # Write directly to remote file
-        echo "$AUTHORIZED_KEYS" | ssh "github@${{ inputs.ssh-host }}" "sudo tee /home/collaborator/.ssh/authorized_keys > /dev/null"
+        printf '%s\n' "${AUTHORIZED_KEYS%$'\n'}" | ssh "github@${{ inputs.ssh-host }}" "sudo tee /home/collaborator/.ssh/authorized_keys > /dev/null"
 
         echo "::endgroup::"
     - name: Verify authorized_keys
