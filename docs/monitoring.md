@@ -13,9 +13,15 @@ Forward the port to your machine with SSH and open `http://localhost:5000` in yo
 ssh -L 5000:127.0.0.1:8080 collaborator@<your-server>
 ```
 
-The local port is yours to choose.
-The forwarded destination must stay `127.0.0.1:8080`, exactly as given, because the pinned SSH key permits that literal address only.
-`ssh -L 5000:localhost:8080 collaborator@<your-server>` fails with `open failed: administratively prohibited`, because the key does not permit the name `localhost`.
+The local port is yours to choose, and so is the destination spelling.
+The pinned SSH key permits `127.0.0.1:8080` and `localhost:8080`, exactly as written, which both reach the same Dozzle instance:
+
+```bash
+ssh -L 5000:127.0.0.1:8080 collaborator@<your-server>
+ssh -L 5000:localhost:8080 collaborator@<your-server>
+```
+
+Any other destination is refused with `open failed: administratively prohibited`.
 
 SSH access to the server is the only authentication.
 Dozzle needs no additional login.
