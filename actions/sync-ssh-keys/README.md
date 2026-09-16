@@ -10,7 +10,7 @@ Collaborators who lose access disappear from the file with the next run.
 The `collaborator` account owns the Docker socket, so every key is restricted in `authorized_keys`:
 
 - `command="docker system dial-stdio"` — the key can do nothing but proxy the Docker socket. The Docker CLI tunnels the socket over stdin and stdout, so the forced command needs no port forwarding.
-- `permitopen="127.0.0.1:8080"` — the key may open local and dynamic forwards (`-L`, `-D`), but only to [Dozzle] on the host loopback. `permitopen` compares the requested destination literally, so the SSH client must name `127.0.0.1`: `ssh -L 8080:127.0.0.1:8080 collaborator@<your-server>` works, `localhost` is refused.
+- `permitopen="127.0.0.1:8080"` — the key may open local and dynamic forwards (`-L`, `-D`), but only to [Dozzle] on the host loopback. `permitopen` compares the requested destination literally, so the SSH client must name `127.0.0.1`: `ssh -L 5000:127.0.0.1:8080 collaborator@<your-server>` works, `localhost` is refused. The local port is free to choose; only the destination is pinned.
 - `no-X11-forwarding`, `no-agent-forwarding`, `no-pty` — no shell, no agent, no X11.
 
 `permitopen` sets the complete list of allowed destinations, so no other host or port is reachable.
