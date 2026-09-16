@@ -14,7 +14,8 @@ ssh -L 5000:127.0.0.1:8080 collaborator@<your-server>
 ```
 
 The local port is yours to choose.
-The forwarded destination must stay `127.0.0.1:8080`, exactly as given, because the pinned SSH key permits no other destination.
+The forwarded destination must stay `127.0.0.1:8080`, exactly as given, because the pinned SSH key permits that literal address only.
+`ssh -L 5000:localhost:8080 collaborator@<your-server>` fails with `open failed: administratively prohibited`, because the key does not permit the name `localhost`.
 
 SSH access to the server is the only authentication.
 Dozzle needs no additional login.
