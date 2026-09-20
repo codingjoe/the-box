@@ -11,6 +11,9 @@ PRUNE_OLDER_THAN="${PRUNE_OLDER_THAN-72h}"
 # Container name of the automatic recovery service of The Box stack.
 AUTOHEAL_CONTAINER=autoheal
 
+# Tracks whether this run stopped automatic recovery.
+AUTOHEAL_PAUSED=false
+
 compose() {
     docker compose --file "$COMPOSE_FILE" --project-name "$PROJECT_NAME" "$@"
 }
@@ -20,6 +23,10 @@ rollout() {
 }
 
 resume_autoheal() {
+    if [ "$AUTOHEAL_PAUSED" != "true" ]; then
+        return 0
+    fi
+    AUTOHEAL_PAUSED=false
     echo "Starting $AUTOHEAL_CONTAINER"
     docker start "$AUTOHEAL_CONTAINER" >/dev/null
 }
@@ -39,6 +46,7 @@ pause_autoheal() {
     # Resume on any exit, including a cancellation of the workflow run.
     trap 'exit 143' INT TERM
     trap resume_autoheal EXIT
+    AUTOHEAL_PAUSED=true
     docker stop "$AUTOHEAL_CONTAINER" >/dev/null
 }
 
@@ -71,6 +79,11 @@ for service in $ROLLOUT_SERVICES; do
     rollout "$service"
     echo "::endgroup::"
 done
+
+# Start automatic recovery again before the housekeeping steps. They remove
+# stopped containers that are older than the prune window, which would delete
+# the autoheal container that this deployment stopped.
+resume_autoheal
 
 # Connect caddy to this project's ingress network so it can reach the app
 # without sharing a network with any other app on the box.
