@@ -32,6 +32,23 @@ dtop
 
 The install script creates a `.dtop.yml` configuration file for your project with production and development contexts.
 
+## Automatic Recovery
+
+The Box restarts unhealthy containers with [autoheal].
+A container is unhealthy when its healthcheck keeps failing.
+Docker does not restart an unhealthy container on its own, because its process still runs.
+
+Autoheal polls the Docker API and restarts every container that reports an unhealthy status.
+It monitors all containers on the host, including the containers of all applications.
+Add the label `autoheal.monitor.enable=false` to a container to exclude it from automatic recovery.
+Add the label `autoheal.restart.enable=false` to keep a container monitored without restarting it.
+
+Autoheal waits up to 10 seconds for a container to stop before it kills it.
+Set the `autoheal.stop.timeout` label on a container to change that value, in seconds.
+
+Containers without a healthcheck are never restarted, because Docker reports no health status for them.
+Traffic facing services need a healthcheck for the zero-downtime rollout anyway, see [Deployment](deployment.md).
+
 ## Application Monitoring
 
 The Box provides only basic monitoring tools out of the box to help you assess your container health. For more advanced monitoring, logging, and alerting capabilities, consider integrating third-party services such as [Sentry].
@@ -55,6 +72,7 @@ Forward the port as shown above, then add the server to your MCP client configur
 The tools are read-only.
 They list containers and hosts, and fetch or search container logs.
 
+[autoheal]: https://github.com/tmknight/docker-autoheal
 [dozzle]: https://dozzle.dev/
 [dtop]: https://dtop.dev/
 [mcp]: https://modelcontextprotocol.io/
