@@ -29,7 +29,7 @@ inputs:
   rollout-timeout:
     description: 'Seconds to wait for new containers to become healthy before rollback. Must be more than the healthcheck start_period plus interval times retries.'
     required: false
-    default: '60'
+    default: '120'
   pause-autoheal:
     description: 'Stop automatic recovery for the duration of the rollout, so a container that fails its healthcheck fails the deployment. Set to false to keep automatic recovery running.'
     required: false
