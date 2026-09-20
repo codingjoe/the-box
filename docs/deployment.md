@@ -110,7 +110,7 @@ The `rollout-timeout` value must be more than the healthcheck `start_period` plu
 Automatic recovery, see [Monitoring](monitoring.md), also applies during a rollout.
 The Box restarts an unhealthy new replica, and the rollout waits again.
 A replica that recovers after a restart does not fail the deployment.
-Add the label `autoheal.restart.enable=false` to a rollout service so that a failing healthcheck fails the deployment.
+A replica that stays unhealthy fails the deployment when the `rollout-timeout` expires.
 
 The `docker-rollout.pre-stop-hook` label drains old containers before they stop.
 Then in-flight requests do not fail.
