@@ -4,8 +4,12 @@ set -e
 COMPOSE_FILE="${COMPOSE_FILE:?COMPOSE_FILE is required}"
 PROJECT_NAME="${PROJECT_NAME:?PROJECT_NAME is required}"
 ROLLOUT_SERVICES="${ROLLOUT_SERVICES:-web}"
-ROLLOUT_TIMEOUT="${ROLLOUT_TIMEOUT:-120}"
+ROLLOUT_TIMEOUT="${ROLLOUT_TIMEOUT:-60}"
+PAUSE_AUTOHEAL="${PAUSE_AUTOHEAL:-true}"
 PRUNE_OLDER_THAN="${PRUNE_OLDER_THAN-72h}"
+
+# Container name of the automatic recovery service of The Box stack.
+AUTOHEAL_CONTAINER=autoheal
 
 compose() {
     docker compose --file "$COMPOSE_FILE" --project-name "$PROJECT_NAME" "$@"
@@ -13,6 +17,29 @@ compose() {
 
 rollout() {
     docker rollout --file "$COMPOSE_FILE" --project-name "$PROJECT_NAME" --timeout "$ROLLOUT_TIMEOUT" "$@"
+}
+
+resume_autoheal() {
+    echo "Starting $AUTOHEAL_CONTAINER"
+    docker start "$AUTOHEAL_CONTAINER" >/dev/null
+}
+
+# Automatic recovery restarts a new replica that fails its healthcheck, and
+# hides a deployment that should fail. Stop it for the rollout and start it
+# again afterwards, also when the rollout or the whole deployment fails.
+pause_autoheal() {
+    if [ "$PAUSE_AUTOHEAL" != "true" ]; then
+        return 0
+    fi
+    if ! docker inspect --format '{{.State.Running}}' "$AUTOHEAL_CONTAINER" 2>/dev/null | grep --quiet true; then
+        echo "Automatic recovery is not running, leaving it alone"
+        return 0
+    fi
+    echo "Stopping $AUTOHEAL_CONTAINER for the rollout"
+    # Resume on any exit, including a cancellation of the workflow run.
+    trap 'exit 143' INT TERM
+    trap resume_autoheal EXIT
+    docker stop "$AUTOHEAL_CONTAINER" >/dev/null
 }
 
 # Bring up all services that don't take part in the zero downtime rollout.
@@ -36,6 +63,9 @@ fi
 echo "::endgroup::"
 
 # Roll out each traffic facing service without downtime.
+if [ -n "$ROLLOUT_SERVICES" ]; then
+    pause_autoheal
+fi
 for service in $ROLLOUT_SERVICES; do
     echo "::group::Rolling out $service"
     rollout "$service"

@@ -2,6 +2,7 @@ name: the-box
 services:
   autoheal:
     image: tmknight88/docker-autoheal:0.14.0
+    container_name: autoheal
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /etc/localtime:/etc/localtime:ro

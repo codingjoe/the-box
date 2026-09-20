@@ -49,6 +49,8 @@ Set the `autoheal.stop.timeout` label on a container to change that value, in se
 Containers without a healthcheck are never restarted, because Docker reports no health status for them.
 Traffic facing services need a healthcheck for the zero-downtime rollout anyway, see [Deployment](deployment.md).
 
+The deploy action pauses automatic recovery for the duration of a rollout, see [Deployment](deployment.md).
+
 ## Application Monitoring
 
 The Box provides only basic monitoring tools out of the box to help you assess your container health. For more advanced monitoring, logging, and alerting capabilities, consider integrating third-party services such as [Sentry].
