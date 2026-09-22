@@ -35,21 +35,15 @@ The install script creates a `.dtop.yml` configuration file for your project wit
 ## Automatic Recovery
 
 The Box restarts unhealthy containers with [autoheal].
-A container is unhealthy when its healthcheck keeps failing.
-Docker does not restart an unhealthy container on its own, because its process still runs.
+Docker does not restart them on its own, because their process still runs.
 
-Autoheal polls the Docker API and restarts every container that reports an unhealthy status.
-It monitors all containers on the host, including the containers of all applications.
-Add the label `autoheal.monitor.enable=false` to a container to exclude it from automatic recovery.
-Add the label `autoheal.restart.enable=false` to keep a container monitored without restarting it.
+Autoheal restarts every container on the host that reports an unhealthy status.
+Set the label `autoheal.monitor.enable=false` to exclude a container, or `autoheal.restart.enable=false` to keep it monitored without restarts.
+Set the label `autoheal.stop.timeout` to change the seconds autoheal waits for a container to stop.
 
-Autoheal waits up to 10 seconds for a container to stop before it kills it.
-Set the `autoheal.stop.timeout` label on a container to change that value, in seconds.
-
-Containers without a healthcheck are never restarted, because Docker reports no health status for them.
-Traffic facing services need a healthcheck for the zero-downtime rollout anyway, see [Deployment](deployment.md).
-
-The deploy action pauses automatic recovery for the duration of a rollout.
+Containers without a healthcheck are never restarted.
+Traffic facing services need one for the rollout anyway, see [Deployment](deployment.md).
+The deploy action pauses automatic recovery during a rollout.
 
 ## Application Monitoring
 

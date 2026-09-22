@@ -28,9 +28,7 @@ resume_autoheal() {
     docker start "$AUTOHEAL_CONTAINER" >/dev/null
 }
 
-# Automatic recovery restarts a new replica that fails its healthcheck, and
-# hides a deployment that should fail. Stop it for the rollout and start it
-# again afterwards, also when the rollout or the whole deployment fails.
+# Recovery would restart an unhealthy new replica and hide a broken deployment.
 pause_autoheal() {
     if [ "$PAUSE_AUTOHEAL" != "true" ]; then
         return 0
@@ -40,7 +38,6 @@ pause_autoheal() {
         return 0
     fi
     echo "Stopping $AUTOHEAL_CONTAINER for the rollout"
-    # Resume on any exit, including a cancellation of the workflow run.
     trap 'exit 143' INT TERM
     trap resume_autoheal EXIT
     AUTOHEAL_PAUSED=true
@@ -77,9 +74,8 @@ for service in $ROLLOUT_SERVICES; do
     echo "::endgroup::"
 done
 
-# Start automatic recovery again before the housekeeping steps. They remove
-# stopped containers that are older than the prune window, which would delete
-# the autoheal container that this deployment stopped.
+# The prune filters on container creation time, so it would delete the
+# autoheal container that this deployment stopped. Start recovery before it.
 resume_autoheal
 
 # Connect caddy to this project's ingress network so it can reach the app
