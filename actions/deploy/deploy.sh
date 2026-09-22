@@ -8,10 +8,7 @@ ROLLOUT_TIMEOUT="${ROLLOUT_TIMEOUT:-120}"
 PAUSE_AUTOHEAL="${PAUSE_AUTOHEAL:-true}"
 PRUNE_OLDER_THAN="${PRUNE_OLDER_THAN-72h}"
 
-# Container name of the automatic recovery service of The Box stack.
 AUTOHEAL_CONTAINER=autoheal
-
-# Tracks whether this run stopped automatic recovery.
 AUTOHEAL_PAUSED=false
 
 compose() {
