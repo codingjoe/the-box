@@ -5,7 +5,11 @@ COMPOSE_FILE="${COMPOSE_FILE:?COMPOSE_FILE is required}"
 PROJECT_NAME="${PROJECT_NAME:?PROJECT_NAME is required}"
 ROLLOUT_SERVICES="${ROLLOUT_SERVICES:-web}"
 ROLLOUT_TIMEOUT="${ROLLOUT_TIMEOUT:-120}"
+PAUSE_AUTOHEAL="${PAUSE_AUTOHEAL:-true}"
 PRUNE_OLDER_THAN="${PRUNE_OLDER_THAN-72h}"
+
+AUTOHEAL_CONTAINER=autoheal
+AUTOHEAL_PAUSED=false
 
 compose() {
     docker compose --file "$COMPOSE_FILE" --project-name "$PROJECT_NAME" "$@"
@@ -13,6 +17,31 @@ compose() {
 
 rollout() {
     docker rollout --file "$COMPOSE_FILE" --project-name "$PROJECT_NAME" --timeout "$ROLLOUT_TIMEOUT" "$@"
+}
+
+resume_autoheal() {
+    if [ "$AUTOHEAL_PAUSED" != "true" ]; then
+        return 0
+    fi
+    AUTOHEAL_PAUSED=false
+    echo "Starting $AUTOHEAL_CONTAINER"
+    docker start "$AUTOHEAL_CONTAINER" >/dev/null
+}
+
+# Recovery would restart an unhealthy new replica and hide a broken deployment.
+pause_autoheal() {
+    if [ "$PAUSE_AUTOHEAL" != "true" ]; then
+        return 0
+    fi
+    if ! docker inspect --format '{{.State.Running}}' "$AUTOHEAL_CONTAINER" 2>/dev/null | grep --quiet true; then
+        echo "Automatic recovery is not running, leaving it alone"
+        return 0
+    fi
+    echo "Stopping $AUTOHEAL_CONTAINER for the rollout"
+    trap 'exit 143' INT TERM
+    trap resume_autoheal EXIT
+    AUTOHEAL_PAUSED=true
+    docker stop "$AUTOHEAL_CONTAINER" >/dev/null
 }
 
 # Bring up all services that don't take part in the zero downtime rollout.
@@ -36,11 +65,18 @@ fi
 echo "::endgroup::"
 
 # Roll out each traffic facing service without downtime.
+if [ -n "$ROLLOUT_SERVICES" ]; then
+    pause_autoheal
+fi
 for service in $ROLLOUT_SERVICES; do
     echo "::group::Rolling out $service"
     rollout "$service"
     echo "::endgroup::"
 done
+
+# The prune filters on container creation time, so it would delete the
+# autoheal container that this deployment stopped. Start recovery before it.
+resume_autoheal
 
 # Connect caddy to this project's ingress network so it can reach the app
 # without sharing a network with any other app on the box.

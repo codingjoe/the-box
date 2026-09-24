@@ -107,6 +107,10 @@ Then the deployment waits until the new containers are healthy.
 Without a healthcheck, the deployment waits a fixed 10 seconds.
 The `rollout-timeout` value must be more than the healthcheck `start_period` plus `interval` times `retries`.
 
+Automatic recovery pauses during a rollout, so a new replica that fails its healthcheck fails the deployment, see [Monitoring](monitoring.md).
+It starts again when the rollout ends, also when the rollout fails.
+Set the `pause-autoheal` input to `false` to leave automatic recovery running during a rollout.
+
 The `docker-rollout.pre-stop-hook` label drains old containers before they stop.
 Then in-flight requests do not fail.
 The [docker-rollout docs](https://docker-rollout.wowu.dev/container-draining) give more information.

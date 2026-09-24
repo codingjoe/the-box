@@ -30,6 +30,10 @@ inputs:
     description: 'Seconds to wait for new containers to become healthy before rollback. Must be more than the healthcheck start_period plus interval times retries.'
     required: false
     default: '120'
+  pause-autoheal:
+    description: 'Stop automatic recovery for the duration of the rollout, so a container that fails its healthcheck fails the deployment. Set to false to keep automatic recovery running.'
+    required: false
+    default: 'true'
   prune-older-than:
     description: 'Remove unused resources older than this duration (for example, "72h"). An empty value skips the housekeeping.'
     required: false
@@ -69,6 +73,7 @@ runs:
         PROJECT_NAME: ${{ github.event.repository.name }}-${{ github.ref_name }}
         ROLLOUT_SERVICES: ${{ inputs.rollout-services }}
         ROLLOUT_TIMEOUT: ${{ inputs.rollout-timeout }}
+        PAUSE_AUTOHEAL: ${{ inputs.pause-autoheal }}
         PRUNE_OLDER_THAN: ${{ inputs.prune-older-than }}
         HOSTNAME: ${{ inputs.hostname }}
         DOTENV_PRIVATE_KEY: ${{ inputs.dotenv-private-key }}

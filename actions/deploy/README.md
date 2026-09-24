@@ -82,3 +82,7 @@ Then the deployment waits until the new containers are healthy.
 Without a healthcheck, the deployment waits a fixed 10 seconds.
 The `rollout-timeout` value must be more than the healthcheck `start_period` plus `interval` times `retries`.
 The default of 120 seconds fits most apps.
+
+The action pauses automatic recovery for the duration of a rollout, so a new replica that fails its healthcheck fails the deployment.
+It starts automatic recovery again when the rollout ends, also when the rollout fails; if a deploy is killed first, run `docker start autoheal`.
+Set the `pause-autoheal` input to `false` to leave automatic recovery running during a rollout.

@@ -1,5 +1,25 @@
 name: the-box
 services:
+  autoheal:
+    image: tmknight88/docker-autoheal:0.14.0
+    container_name: autoheal
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      AUTOHEAL_CONNECTION_TYPE: socket
+      AUTOHEAL_MONITOR_ALL: true
+    network_mode: none
+    restart: unless-stopped
+    labels:
+      - "dev.dozzle.group=the-box"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+    memswap_limit: 128m
+    read_only: true
   caddy:
     image: ghcr.io/codingjoe/the-box-caddy:main
     container_name: caddy
