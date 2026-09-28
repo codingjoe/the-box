@@ -56,7 +56,7 @@ services:
           memory: 256M
     memswap_limit: 512m
   caddy-redis:
-    image: redis:8.10.1-alpine
+    image: redis:8.10.2-alpine
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - caddy_redis:/data
