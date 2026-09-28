@@ -1,7 +1,7 @@
 name: the-box-redis
 services:
   redis:
-    image: redis:8.10.1-alpine
+    image: redis:8.10.2-alpine
     volumes:
       - redis:/data
     networks:
