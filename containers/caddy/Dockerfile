@@ -1,4 +1,4 @@
-FROM caddy:2.11.4-builder-alpine AS builder
+FROM caddy:2.11.6-builder-alpine AS builder
 
 
 RUN --mount=type=cache,target=/go/pkg/mod \
@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --with github.com/ueffel/caddy-brotli
 
 
-FROM caddy:2.11.4-alpine
+FROM caddy:2.11.6-alpine
 LABEL org.opencontainers.image.title="the-box-caddy"
 LABEL org.opencontainers.image.description="Production ready PaaS you can on a RaspberryPi"
 LABEL org.opencontainers.image.url="https://github.com/codingjoe/the-box"
