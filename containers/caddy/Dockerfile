@@ -1,6 +1,5 @@
 FROM caddy:2.11.9-builder-alpine AS builder
 
-
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     xcaddy build \
@@ -9,7 +8,6 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     --with github.com/darkweak/storages/redis/caddy \
     --with github.com/mholt/caddy-l4 \
     --with github.com/ueffel/caddy-brotli
-
 
 FROM caddy:2.11.9-alpine
 LABEL org.opencontainers.image.title="the-box-caddy"
