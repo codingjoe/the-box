@@ -1,7 +1,7 @@
 name: the-box-postgres
 services:
   postgres:
-    image: postgres:18.6
+    image: postgres:18.7
     volumes:
       - postgres:/var/lib/postgresql
     configs:
